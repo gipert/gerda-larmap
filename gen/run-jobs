@@ -3,8 +3,8 @@
 # USAGE: ./run-jobs <num-of-jobs>
 #
 
-[ ! -f ./gerda-sw-all.img ] \
-    && echo "ERROR: missing singularity container gerda-sw-all.img" \
+[ ! -f ../gerda-sw-all.img ] \
+    && echo "ERROR: missing singularity container ../gerda-sw-all.img" \
     && exit
 
 [ ! -f ./run-jobs ] \

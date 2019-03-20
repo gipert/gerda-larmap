@@ -1,3 +1,8 @@
 *.img
 gen/log
 gen/out
+
+# junk
+*.DS_Store
+*.swp
+*.swo

@@ -22,6 +22,8 @@
 /MG/geometry/LArInst/SetFiberCoverage             0.5
 /MG/geometry/LArInst/SegmentedFiberShroudRotation -141.0 deg
 
+/MG/output/LArInst/alwaysTrackPhotons             true
+
 /MG/eventaction/reportingfrequency                1000
 /MG/eventaction/rootschema                        GerdaInstrumentedArray
 /MG/eventaction/rootfilename                      out/${OUTNAME}
