@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# USAGE: ./run-jobs <num-of-jobs>
+#
+
+[ ! -f ./gerda-sw-all.img ] \
+    && echo "ERROR: missing singularity container gerda-sw-all.img" \
+    && exit
+
+[ ! -f ./run-jobs ] \
+    && echo "ERROR: must cd where 'run-jobs' is before running!" \
+    && exit
+
+mkdir -p log out
+echo "INFO: using gerda-sw-all.img container"
+
+for i in `seq 1 $1`; do
+    stamp=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo ''`
+    sed -e "s/\${OUTNAME}/phmap-${stamp}.root/g" lar-vuv.mac.template > log/phmap-${stamp}.mac
+    qsub mage-runner.qsub log/phmap-${stamp}.mac `pwd`
+done
+
+echo "INFO: $1 jobs successfully submitted to qsub"

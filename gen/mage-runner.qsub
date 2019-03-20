@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# USAGE: qsub mage-runner.qsub <mage-macro-file> <working-dir>
+#
+#$ -P short ### queue
+#$ -j y     ### have logoutput and erroroutput in the same file
+#$ -o /dev/null
+#$ -e /dev/null
+
+LOGFILE=$(echo $1 | cut -f 1 -d '.').log
+cd $2
+singularity exec gerda-sw-all.img MaGe $1 &> $LOGFILE

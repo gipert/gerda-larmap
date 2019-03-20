@@ -1,0 +1,3 @@
+*.img
+gen/log
+gen/out
