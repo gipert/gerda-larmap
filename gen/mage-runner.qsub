@@ -9,4 +9,4 @@
 
 LOGFILE=$(echo $1 | cut -f 1 -d '.').log
 cd $2
-singularity exec ../gerda-sw-all.img MaGe $1 &> $LOGFILE
+singularity exec ../gerda-sw-all.img MaGe --no-colors $1 &> $LOGFILE

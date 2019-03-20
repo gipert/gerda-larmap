@@ -22,19 +22,22 @@
 /MG/geometry/LArInst/SetFiberCoverage             0.5
 /MG/geometry/LArInst/SegmentedFiberShroudRotation -141.0 deg
 
-/MG/output/LArInst/alwaysTrackPhotons             true
-
-/MG/eventaction/reportingfrequency                1000
+/MG/eventaction/reportingfrequency                5000
 /MG/eventaction/rootschema                        GerdaInstrumentedArray
 /MG/eventaction/rootfilename                      out/${OUTNAME}
+
+/MG/output/LArInst/alwaysTrackPhotons             true
 
 /run/initialize
 
 /MG/generator/confine                             volume
 /MG/generator/volume                              CryoLiquidPhysical
-/MG/generator/select                              G4gun
-/gun/particle                                     opticalphoton
-/gun/energy                                       9.68 eV # 128nm (VUV) LAr scintillation
-/gun/polarization                                 1 1 1
+
+/MG/generator/select                              SPS
+/gps/particle                                     opticalphoton
+/gps/ene/type                                     Gauss
+/gps/ene/mono                                     9.68 eV # 128nm (VUV) LAr scintillation
+/gps/ene/sigma                                    0.22 eV # gaussian width
+/gps/polarization                                 1 1 1
 
 /run/beamOn                                       1000000
