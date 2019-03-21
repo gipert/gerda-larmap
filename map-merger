@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+
+import argparse
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Merge two LAr probability maps.',
+        usage='%(prog)s [-h] file.root file.root [file.root ...]'
+    )
+    parser.add_argument('file1', metavar='file.root',
+        nargs=1, help='output of create-larmap program')
+    parser.add_argument('file2', metavar='file.root',
+        nargs='+', help=argparse.SUPPRESS)
+
+    args = parser.parse_args()
+    args.file = args.file1 + args.file2
+
+    from ROOT import TFile, TH3D
+
+    files = []
+    vertices = []
+    vertices_hits = []
+    for f in args.file:
+        rf = TFile(f)
+
+        if not rf:
+            raise RuntimeError('Invalid input file detected')
+        if not rf.Get('LAr_vertex_map'):
+            raise RuntimeError("Could not find 'LAr_vertex_map' object")
+        if not rf.Get('LAr_vertex_hits_map'):
+            raise RuntimeError("Could not find 'LAr_vertex_hits_map' object")
+
+        files.append(rf)
+        vertices.append(rf.Get('LAr_vertex_map'))
+        vertices_hits.append(rf.Get('LAr_vertex_hits_map'))
+
+    for i in range(1, len(vertices)):
+        vertices[0].Add(vertices[i])
+        vertices_hits[0].Add(vertices_hits[i])
+
+    prob_map = vertices_hits[0].Clone('LAr_prob_map')
+    prob_map.Divide(vertices[0])
+
+    fout = TFile('gerda-larmap-merged.root', 'recreate')
+    fout.cd()
+
+    vertices[0].Write()
+    vertices_hits[0].Write()
+    prob_map.Write()
+
+    print('INFO: gerda-larmap-merged.root created')
+
+
+if __name__ == '__main__':
+    main()
