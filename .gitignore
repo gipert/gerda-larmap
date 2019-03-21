@@ -1,6 +1,8 @@
 *.img
+*.root
 gen/log
 gen/out
+create-larmap
 
 # junk
 *.DS_Store

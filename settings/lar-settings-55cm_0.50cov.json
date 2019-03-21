@@ -1,0 +1,28 @@
+{ "settings": {
+      "pmt00" : {"efficiency": 0.183594},
+      "pmt01" : {"efficiency": 0.183594},
+      "pmt02" : {"efficiency": 0.261719},
+      "pmt03" : {"efficiency": 0.214844},
+      "pmt04" : {"efficiency": 0.183594},
+      "pmt05" : {"efficiency": 0.230469},
+      "pmt06" : {"efficiency": 0.144531},
+      "pmt07" : {"efficiency": 0.199219},
+      "pmt08" : {"efficiency": 0.191406},
+      "pmb09" : {"efficiency": 0.464844},
+      "pmb10" : {"efficiency": 0.394531},
+      "pmb11" : {"efficiency": 0.433594},
+      "pmb12" : {"efficiency": 0.332031},
+      "pmb13" : {"efficiency": 0.347656},
+      "pmb14" : {"efficiency": 0.449219},
+      "pmb15" : {"efficiency": 0.363281},
+      "spm16" : {"efficiency": 0.316406},
+      "spm17" : {"efficiency": 0.316406},
+      "spm18" : {"efficiency": 0.378906},
+      "spm19" : {"efficiency": 0.261719},
+      "spm20" : {"efficiency": 0.433594},
+      "spm21" : {"efficiency": 0.402344},
+      "spm22" : {"efficiency": 0.347656},
+      "spm23" : {"efficiency": 0.199219},
+      "spm24" : {"efficiency": 0.417969}
+   }
+}
