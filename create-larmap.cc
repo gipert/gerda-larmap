@@ -20,10 +20,10 @@ int main() {
 
     // load JSON settings
     katrin::KTree config;
-    try { katrin::KTreeFile("settings/map-settings.json").Read(config); }
+    try { katrin::KTreeFile("settings/prob-map-settings.json").Read(config); }
     catch (katrin::KException &e) { std::cerr << e.what() << std::endl; }
 
-    std::cout << "INFO: opening MaGe files\n";
+    std::cout << "INFO: opening MaGe files: " << config["files"].As<std::string>() << std::endl;
     // open MaGe files
     TChain chain("fTree");
     chain.Add(config["files"].As<std::string>().c_str());
@@ -75,10 +75,15 @@ int main() {
     }
     std::cout << std::endl;
 
+    // perform the division
+    auto prob_map = dynamic_cast<TH3D*>(vertex_hits_map.Clone("LAr_prob_map"));
+    prob_map->Divide(&vertex_map);
+
     // write to disk
     TFile fout("gerda-larmap.root", "recreate");
     vertex_map.Write();
     vertex_hits_map.Write();
+    prob_map->Write();
 
     std::cout << "INFO: file 'gerda-larmap.root' created\n";
 
