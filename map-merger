@@ -18,6 +18,9 @@ def main():
 
     from ROOT import TFile, TH3D
 
+    print('INFO: merging together'),
+    print(' '.join(args.file))
+
     files = []
     vertices = []
     vertices_hits = []
