@@ -5,7 +5,7 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Merge two LAr probability maps.',
+        description='Merge two (or more) LAr probability maps.',
         usage='%(prog)s [-h] file.root file.root [file.root ...]'
     )
     parser.add_argument('file1', metavar='file.root',
