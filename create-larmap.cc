@@ -16,11 +16,12 @@
 
 #include "ProgressBar.h"
 
-int main() {
+int main(int argc, char** argv) {
 
     // load JSON settings
+    auto configname = argc > 1 ? argv[1] : "settings/prob-map-settings.json";
     katrin::KTree config;
-    try { katrin::KTreeFile("settings/prob-map-settings.json").Read(config); }
+    try { katrin::KTreeFile(configname).Read(config); }
     catch (katrin::KException &e) { std::cerr << e.what() << std::endl; }
 
     std::cout << "INFO: opening MaGe files: " << config["files"].As<std::string>() << std::endl;
@@ -80,12 +81,13 @@ int main() {
     prob_map->Divide(&vertex_map);
 
     // write to disk
-    TFile fout("gerda-larmap.root", "recreate");
+    auto filename = config["output"].Or("gerda-larmap.root").As<std::string>();
+    TFile fout(filename.c_str(), "recreate");
     vertex_map.Write();
     vertex_hits_map.Write();
     prob_map->Write();
 
-    std::cout << "INFO: file 'gerda-larmap.root' created\n";
+    std::cout << "INFO: file '" + filename + "' created\n";
 
     return 0;
 }
