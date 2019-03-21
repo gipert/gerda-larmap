@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for i in `seq 0 9`; do
+    ./run-jobs-runid lar-vuv-complete.mac.template 100 00$i
+    ./run-jobs-runid lar-vuv-array.mac.template 100 array-00$i
+done

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# USAGE: ./run-jobs <template-mac> <num-of-jobs> [<run-name>]
+# USAGE: ./run-jobs-runid <template-mac> <num-of-jobs> [<run-name>]
 
 if [ -z "$3" ]; then
     runid=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 7 ; echo ''`
