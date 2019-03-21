@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# USAGE: qsub create-larmap.qsub <runid> <working-dir>
+#
+#$ -P short ### queue
+#$ -j y     ### have logoutput and erroroutput in the same file
+#$ -o /dev/null
+#$ -e /dev/null
+
+cd $2
+mkdir -p log out
+LOGFILE=log/create-larmap-$1.log
+singularity exec gerda-sw-all_dev.img \
+    ./create-larmap settings/prob-map-settings.json \
+                    "gen/out/$1/phmap-\*.root" \
+                    out/gerda-larmap-$1.root &> $LOGFILE

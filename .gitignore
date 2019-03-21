@@ -1,5 +1,6 @@
 *.img
 *.root
+log
 gen/log
 gen/out
 create-larmap

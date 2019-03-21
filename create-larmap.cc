@@ -1,3 +1,6 @@
+/* USAGE: create-larmap [<settings.json>] [<MaGe-filelist>] [<output-filename>]
+ *
+ */
 #include <iostream>
 
 // ROOT
@@ -26,8 +29,9 @@ int main(int argc, char** argv) {
 
     std::cout << "INFO: opening MaGe files: " << config["files"].As<std::string>() << std::endl;
     // open MaGe files
+    auto filelist = argc > 2 ? argv[2] : config["files"].As<std::string>();
     TChain chain("fTree");
-    chain.Add(config["files"].As<std::string>().c_str());
+    chain.Add(filelist.c_str());
 
     // initialize probability map
     auto& s = config;
@@ -81,7 +85,7 @@ int main(int argc, char** argv) {
     prob_map->Divide(&vertex_map);
 
     // write to disk
-    auto filename = config["output"].Or("gerda-larmap.root").As<std::string>();
+    auto filename = argc > 3 ? argv[3] : config["output"].Or("gerda-larmap.root").As<std::string>();
     TFile fout(filename.c_str(), "recreate");
     vertex_map.Write();
     vertex_hits_map.Write();
