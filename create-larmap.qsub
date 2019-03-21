@@ -12,5 +12,5 @@ mkdir -p log out
 LOGFILE=log/create-larmap-$1.log
 singularity exec gerda-sw-all_dev.img \
     ./create-larmap settings/prob-map-settings.json \
-                    "gen/out/$1/phmap-\*.root" \
+                    "gen/out/$1/phmap-*.root" \
                     out/gerda-larmap-$1.root &> $LOGFILE

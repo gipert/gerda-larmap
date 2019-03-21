@@ -27,9 +27,9 @@ int main(int argc, char** argv) {
     try { katrin::KTreeFile(configname).Read(config); }
     catch (katrin::KException &e) { std::cerr << e.what() << std::endl; }
 
-    std::cout << "INFO: opening MaGe files: " << config["files"].As<std::string>() << std::endl;
     // open MaGe files
     auto filelist = argc > 2 ? argv[2] : config["files"].As<std::string>();
+    std::cout << "INFO: opening MaGe files: " << filelist << std::endl;
     TChain chain("fTree");
     chain.Add(filelist.c_str());
 
