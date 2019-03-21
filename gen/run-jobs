@@ -1,23 +1,30 @@
 #!/bin/bash
 #
-# USAGE: ./run-jobs <num-of-jobs>
-#
+# USAGE: ./run-jobs <num-of-jobs> [<run-name>]
+
+if [ -z "$1" ]; then
+    runid=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 7 ; echo ''`
+    echo "INFO: using random run ID $runid"
+else
+    runid=$2
+    echo "INFO: using run ID $runid"
+fi
 
 [ ! -f ../gerda-sw-all.img ] \
-    && echo "ERROR: missing singularity container ../gerda-sw-all.img" \
+    && echo "ERROR: missing Singularity container ../gerda-sw-all.img" \
     && exit
 
 [ ! -f ./run-jobs ] \
     && echo "ERROR: must cd where 'run-jobs' is before running!" \
     && exit
 
-mkdir -p log out
-echo "INFO: using gerda-sw-all.img container"
+mkdir -p log/$runid out/$runid
+echo "INFO: using ../gerda-sw-all.img container"
 
 for i in `seq 1 $1`; do
     stamp=`date +%s%N | cut -b1-13`
-    sed -e "s/\${OUTNAME}/phmap-${stamp}.root/g" lar-vuv.mac.template > log/phmap-${stamp}.mac
-    qsub mage-runner.qsub log/phmap-${stamp}.mac `pwd`
+    sed -e "s/\${OUTNAME}/out\/$runid\/phmap-$stamp.root/g" lar-vuv.mac.template > log/$runid/phmap-$stamp.mac
+    qsub -N mage-$runid-$stamp mage-runner.qsub log/$runid/phmap-$stamp.mac `pwd`
 done
 
-echo "INFO: $1 jobs successfully submitted to qsub"
+echo "INFO: $1 jobs for run ID $runid successfully submitted to qsub"

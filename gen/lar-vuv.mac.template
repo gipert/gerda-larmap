@@ -24,7 +24,7 @@
 
 /MG/eventaction/reportingfrequency                5000
 /MG/eventaction/rootschema                        GerdaInstrumentedArray
-/MG/eventaction/rootfilename                      out/${OUTNAME}
+/MG/eventaction/rootfilename                      ${OUTNAME}
 
 /MG/output/LArInst/alwaysTrackPhotons             true
 
@@ -40,4 +40,11 @@
 /gps/ene/sigma                                    0.22 eV # gaussian width
 /gps/polarization                                 1 1 1
 
-/run/beamOn                                       1000000
+/MG/generator/Sampling/volume/name                Cylinder
+/MG/generator/Sampling/volume/innerCylinderRadius 0 m
+/MG/generator/Sampling/volume/outerCylinderRadius 45 cm
+/MG/generator/Sampling/volume/cylinderHeight      220 cm
+/MG/generator/Sampling/volume/offsetCenterXPos    0 mm
+/MG/generator/Sampling/volume/offsetCenterZPos    5 cm
+
+/run/beamOn                                       300000 # ~10MB file
