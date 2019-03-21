@@ -2,7 +2,7 @@
 #
 # USAGE: ./run-jobs <num-of-jobs> [<run-name>]
 
-if [ -z "$1" ]; then
+if [ -z "$2" ]; then
     runid=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 7 ; echo ''`
     echo "INFO: using random run ID $runid"
 else
