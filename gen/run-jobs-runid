@@ -14,7 +14,7 @@ fi
     && echo "ERROR: missing Singularity container ../gerda-sw-all.img" \
     && exit
 
-[ ! -f ./run-jobs ] \
+[ ! -f ./run-jobs-runid ] \
     && echo "ERROR: must cd where 'run-jobs' is before running!" \
     && exit
 
