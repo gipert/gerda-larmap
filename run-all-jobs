@@ -1,5 +1,7 @@
 #!/bin/bash
 
 for d in gen/out/*; do
-    qsub -N larmap-`basename $d` create-larmap.qsub `basename $d` `pwd`
+    runid=`basename $d`
+    [ ! -f out/gerda-larmap-$runid.root ] && \
+        qsub -N larmap-$runid create-larmap.qsub $runid `pwd`
 done
