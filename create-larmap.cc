@@ -11,6 +11,7 @@
 #include "TTreeReader.h"
 #include "TTreeReaderArray.h"
 #include "TTreeReaderValue.h"
+#include "TMath.h"
 
 // GERDA sw
 #include "KTreeFile.h"
@@ -18,6 +19,8 @@
 #include "gerda-ada/T4SimHandler.h"
 
 #include "ProgressBar.h"
+
+bool divide_maps(TH3D *h1, const TH3D *h2);
 
 int main(int argc, char** argv) {
 
@@ -82,7 +85,7 @@ int main(int argc, char** argv) {
 
     // perform the division
     auto prob_map = dynamic_cast<TH3D*>(vertex_hits_map.Clone("LAr_prob_map"));
-    prob_map->Divide(&vertex_map);
+    divide_maps(prob_map, &vertex_map);
 
     // write to disk
     auto filename = argc > 3 ? argv[3] : config["output"].Or("gerda-larmap.root").As<std::string>();
@@ -94,4 +97,27 @@ int main(int argc, char** argv) {
     std::cout << "INFO: file '" + filename + "' created\n";
 
     return 0;
+}
+
+// NB: does not check for input consistency
+bool divide_maps(TH3D *h1, const TH3D *h2) {
+
+    if (!h1 or !h2) {
+        std::cerr << "ERROR: passing a nullptr to divide_maps.";
+        return false;
+    }
+
+    for (int i = 0; i < h1->GetNcells(); ++i) {
+        double c1 = h1->GetBinContent(i);
+        double c2 = h2->GetBinContent(i);
+
+        if (c2 == 0) h1->SetBinContent(i, -1); // -1 means zero statistics
+        else {
+            h1->SetBinContent(i, c1/c2);
+            // compute uncertainty according to Bernoulli statistics
+            h1->SetBinError(i, TMath::Sqrt(c1*(c1-c2)/c2));
+        }
+    }
+
+    return true;
 }
