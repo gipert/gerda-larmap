@@ -1,5 +1,5 @@
 {
-    "files" : "gen/out/*/phmap-*.root",
+    "files" : "gen/out/000/phmap-1553178995071.root",
     "range-cm" : [[-45, 45], [-45, 45], [-105, 115]],
-    "bins" : [400, 400, 800]
+    "bins" : [300, 300, 600]
 }
