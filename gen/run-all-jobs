@@ -9,6 +9,6 @@ for i in `seq 10 99`; do
     [ ! -d out/0$i ] && ./run-jobs-runid lar-vuv-complete.mac.template 100 0$i
 done
 
-for i in `seq 100 999`; do
+for i in `seq 100 300`; do
     [ ! -d out/$i ] && ./run-jobs-runid lar-vuv-complete.mac.template 100 $i
 done

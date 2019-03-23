@@ -49,4 +49,4 @@
 /MG/generator/Sampling/volume/offsetCenterXPos    0 mm
 /MG/generator/Sampling/volume/offsetCenterZPos    -10 cm
 
-/run/beamOn                                       300000 # ~10MB file
+/run/beamOn                                       1000000
