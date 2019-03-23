@@ -26,6 +26,7 @@
 /MG/eventaction/rootschema                        GerdaInstrumentedArray
 /MG/eventaction/rootfilename                      ${OUTNAME}
 
+/MG/output/reduceHitInfo1                         true
 /MG/output/LArInst/alwaysTrackPhotons             true
 
 /run/initialize
