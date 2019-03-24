@@ -19,6 +19,9 @@ def main():
         nargs=1, help='output of create-larmap program')
     parser.add_argument('file2', metavar='file.root',
         nargs='+', help=argparse.SUPPRESS)
+    parser.add_argument('-c', '--check', action='store_true',
+        default=False, dest='check',
+        help='check ROOT files before')
 
     args = parser.parse_args()
     args.file = args.file1 + args.file2
@@ -28,44 +31,44 @@ def main():
     print('INFO: merging together'),
     print(' '.join(args.file))
 
-    files = []
-    vertices = []
-    vertices_hits = []
-    for f in args.file:
-        print 'INFO: Opening file', f, '\b...\r',
-        sys.stdout.flush()
+    if args.check:
+        for f in args.file:
+            print 'INFO: checking file', f, '\b...\r',
+            sys.stdout.flush()
 
-        rf = TFile(f)
+            rf = TFile(f, 'read')
 
-        if not rf:
-            raise RuntimeError('Invalid input file detected')
-        if not rf.Get('LAr_vertex_map'):
-            raise RuntimeError("Could not find 'LAr_vertex_map' object")
-        if not rf.Get('LAr_vertex_hits_map'):
-            raise RuntimeError("Could not find 'LAr_vertex_hits_map' object")
+            if not rf:
+                raise RuntimeError('Invalid input file detected')
+            if not rf.Get('LAr_vertex_map'):
+                raise RuntimeError("Could not find 'LAr_vertex_map' object")
+            if not rf.Get('LAr_vertex_hits_map'):
+                raise RuntimeError("Could not find 'LAr_vertex_hits_map' object")
 
-        files.append(rf)
-        vertices.append(rf.Get('LAr_vertex_map'))
-        vertices_hits.append(rf.Get('LAr_vertex_hits_map'))
-
-    print('')
+        print('')
     print('INFO: adding everything together...')
-    for i in range(1, len(vertices)):
+
+    rf = TFile(str(args.file[0]), 'read')
+    vertices = rf.Get('LAr_vertex_map')
+    vertices_hits = rf.Get('LAr_vertex_hits_map')
+
+    for f in args.file[1:]:
         print 'INFO: Processing file', f, '\b...\r',
         sys.stdout.flush()
-        vertices[0].Add(vertices[i])
-        vertices_hits[0].Add(vertices_hits[i])
+        _rf = TFile(str(f), 'read')
+        vertices.Add(_rf.Get('LAr_vertex_map'))
+        vertices_hits.Add(_rf.Get('LAr_vertex_hits_map'))
 
     print('')
     print('INFO: dividing...')
-    prob_map = vertices_hits[0].Clone('LAr_prob_map')
-    prob_map.Divide(vertices[0])
+    prob_map = vertices_hits.Clone('LAr_prob_map')
+    prob_map.Divide(vertices)
 
     fout = TFile(args.outfile, 'recreate')
     fout.cd()
 
-    vertices[0].Write()
-    vertices_hits[0].Write()
+    vertices.Write()
+    vertices_hits.Write()
     prob_map.Write()
 
     print 'INFO:', args.outfile, 'created.'
