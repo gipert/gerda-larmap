@@ -1,5 +1,8 @@
 #!/bin/bash
 #
+# Author: Luigi Pertoldi - pertoldi@pd.infn.it
+# Created: Sun 24 Mar 2019
+#
 # USAGE: qsub create-larmap.qsub <runid> <working-dir>
 #
 #$ -P short ### queue

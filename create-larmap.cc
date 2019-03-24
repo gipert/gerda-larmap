@@ -1,4 +1,9 @@
-/* USAGE: create-larmap [<settings.json>] [<MaGe-filelist>] [<output-filename>]
+/* create-larmap.cc
+ *
+ * Author: Luigi Pertoldi - pertoldi@pd.infn.it
+ * Created: Sun 24 Mar 2019
+ *
+ * USAGE: create-larmap [<settings.json>] [<MaGe-filelist>] [<output-filename>]
  *
  */
 #include <iostream>
