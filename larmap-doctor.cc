@@ -29,16 +29,16 @@ int main(int argc, char** argv) {
 
     ProgressBar bar(ncells); std::cout << "INFO: ";
     for (int i = 0; i < ncells; ++i) {
-        if (h->GetBinContent(i) < 0) missing += 1;
-        if (h->GetBinError(i) > 0.01*h->GetBinContent(i)) big_error += 1;
+        if      (h->GetBinContent(i) < 0)                      missing += 1;
+        else if (h->GetBinError(i) > 0.01*h->GetBinContent(i)) big_error += 1;
         bar.Update();
     }
     std::cout << std::endl;
 
     if (missing) {
-        std::cerr << "WARNING: " <<  missing << "/" << ncells << "("
-                  << round(missing*1000./ncells)/10 << "%)"
-                  << "invalid (<0) voxels found\n";
+        std::cerr << "WARNING: " <<  missing << "/" << ncells << " ("
+                  << round(missing*1000./ncells)/10
+                  << "%) invalid (<0) voxels found\n";
     }
     if (big_error) {
         std::cerr << "WARNING: " << big_error << "/" << ncells << " ("

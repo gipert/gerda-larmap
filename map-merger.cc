@@ -101,7 +101,7 @@ bool divide_maps(TH3D *h1, const TH3D *h2) {
         double c1 = h1->GetBinContent(i);
         double c2 = h2->GetBinContent(i);
 
-        if (c2 == 0) h1->SetBinContent(i, -1); // -1 means zero statistics
+        if (c2 <= 0) h1->SetBinContent(i, -1); // -1 means zero statistics
         else {
             h1->SetBinContent(i, c1/c2);
             // compute uncertainty according to Bernoulli statistics
