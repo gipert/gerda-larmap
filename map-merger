@@ -7,8 +7,11 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(
         description='Merge two (or more) LAr probability maps.',
-        usage='%(prog)s [-h] file.root file.root [file.root ...]'
+        usage='%(prog)s [-h] [-o outfile.root] file.root file.root [file.root ...]'
     )
+    parser.add_argument('-o', '--output',
+        dest='outfile', default='gerda-larmap-merged.root',
+        metavar='outfile.root', help='output filename')
     parser.add_argument('file1', metavar='file.root',
         nargs=1, help='output of create-larmap program')
     parser.add_argument('file2', metavar='file.root',
@@ -26,7 +29,7 @@ def main():
     vertices = []
     vertices_hits = []
     for f in args.file:
-        print 'INFO: Adding file', f, '...\r',
+        print 'INFO: Opening file', f, '\b...\r',
         sys.stdout.flush()
 
         rf = TFile(f)
@@ -42,21 +45,27 @@ def main():
         vertices.append(rf.Get('LAr_vertex_map'))
         vertices_hits.append(rf.Get('LAr_vertex_hits_map'))
 
+    print('')
+    print('INFO: adding everything together...')
     for i in range(1, len(vertices)):
+        print 'INFO: Processing file', f, '\b...\r',
+        sys.stdout.flush()
         vertices[0].Add(vertices[i])
         vertices_hits[0].Add(vertices_hits[i])
 
+    print('')
+    print('INFO: dividing...')
     prob_map = vertices_hits[0].Clone('LAr_prob_map')
     prob_map.Divide(vertices[0])
 
-    fout = TFile('gerda-larmap-merged.root', 'recreate')
+    fout = TFile(args.outfile, 'recreate')
     fout.cd()
 
     vertices[0].Write()
     vertices_hits[0].Write()
     prob_map.Write()
 
-    print('INFO: gerda-larmap-merged.root created')
+    print 'INFO:', args.outfile, 'created.'
 
 
 if __name__ == '__main__':
