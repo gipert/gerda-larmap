@@ -4,6 +4,7 @@ log
 gen/log
 gen/out
 create-larmap
+larmap-doctor
 
 # junk
 *.DS_Store
