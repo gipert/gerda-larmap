@@ -1,3 +1,8 @@
+# Makefile
+#
+# Author: Luigi Pertoldi - pertoldi@pd.infn.it
+# Created: Sun 24 Mar 2019
+
 create-larmap : create-larmap.cc progressbar/ProgressBar.cc
 	c++ -std=c++11 -g -O3 -Wall -o $@ $^             \
         $$(root-config --libs --cflags) -lTreePlayer \

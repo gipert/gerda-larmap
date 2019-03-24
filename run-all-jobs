@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Author: Luigi Pertoldi - pertoldi@pd.infn.it
+# Created: Sun 24 Mar 2019
 
 for d in gen/out/*; do
     runid=`basename $d`
