@@ -5,6 +5,7 @@ gen/log
 gen/out
 create-larmap
 larmap-doctor
+map-merger
 
 # junk
 *.DS_Store

@@ -11,7 +11,7 @@ FLAGS += $$(mgdo-config --libs --cflags)
 FLAGS += $$(databricxx-config --libs --cflags)
 FLAGS += -Iprogressbar
 
-all : create-larmap larmap-doctor
+all : create-larmap larmap-doctor map-merger
 
 create-larmap : create-larmap.cc progressbar/ProgressBar.cc
 	c++ $(FLAGS) -o $@ $^
@@ -19,5 +19,8 @@ create-larmap : create-larmap.cc progressbar/ProgressBar.cc
 larmap-doctor : larmap-doctor.cc progressbar/ProgressBar.cc
 	c++ $(FLAGS) -o $@ $^
 
+map-merger : map-merger.cc
+	c++ $(FLAGS) -o $@ $^
+
 clean :
-	-rm create-larmap larmap-doctor
+	-rm create-larmap larmap-doctor map-merger
