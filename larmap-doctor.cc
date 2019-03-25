@@ -25,11 +25,13 @@ int main(int argc, char** argv) {
 
     int missing = 0;
     int big_error = 0;
+    int non_phys = 0;
     int ncells = h->GetNcells();
 
     ProgressBar bar(ncells); std::cout << "INFO: ";
     for (int i = 0; i < ncells; ++i) {
         if      (h->GetBinContent(i) < 0)                      missing += 1;
+        else if (h->GetBinContent(i) > 1)                      non_phys += 1;
         else if (h->GetBinError(i) > 0.01*h->GetBinContent(i)) big_error += 1;
         bar.Update();
     }
@@ -39,6 +41,11 @@ int main(int argc, char** argv) {
         std::cerr << "WARNING: " <<  missing << "/" << ncells << " ("
                   << round(missing*1000./ncells)/10
                   << "%) invalid (<0) voxels found\n";
+    }
+    if (non_phys) {
+        std::cerr << "WARNING: " <<  non_phys << "/" << ncells << " ("
+                  << round(non_phys*1000./ncells)/10
+                  << "%) non-physical (>1) voxels found\n";
     }
     if (big_error) {
         std::cerr << "WARNING: " << big_error << "/" << ncells << " ("
