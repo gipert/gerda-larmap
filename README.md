@@ -16,3 +16,7 @@ cd .. && ./run-all-jobs
 # merge everything
 ./map-merger out/*.root
 ```
+
+## GERDA Tomography
+
+Run `./gerdatomography` to start a nice visualization tool for the just created probability map.
