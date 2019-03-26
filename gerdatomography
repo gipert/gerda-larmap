@@ -33,7 +33,7 @@ void gerdatomography() {
     LAr_prob_map->Rebin3D(factor, factor, factor);
     LAr_prob_map->Scale(1./(factor*factor*factor));
 
-    std::cout << "INFO: displaying...\n";
+    std::cout << "INFO: displaying, this could take a while...\n";
     auto canvas = new TCanvas(
         "gerda_tomography", "GERDA Tomography",
         1800, 1000
@@ -49,14 +49,18 @@ void gerdatomography() {
     );
     xz_pad->SetLogz();
     xz_pad->SetGrid();
+    xz_pad->SetTicks(1,1);
     xz_pad->SetTopMargin(0.1);
+    xz_pad->SetRightMargin(0.12);
     auto xy_pad = new TPad(
         "xy_pad", "XY Projection Pad",
-        0.66, 0.3, 1.0, 1.0
+        0.66, 0.33, 1.0, 1.0
     );
     xy_pad->SetLogz();
     xy_pad->SetGrid();
+    xy_pad->SetTicks(1,1);
     xy_pad->SetTopMargin(0.14);
+    xy_pad->SetRightMargin(0.12);
 
     main_pad->Draw();
     xz_pad->Draw();
@@ -226,8 +230,7 @@ void dynamic_exec() {
         hp_xz->SetStats(false);
         hp_xz->SetMinimum(0);
         hp_xz->SetMaximum(max_prob);
-        c_xz->SetTicks(1,1);
-        hp_xz->Draw("col");
+        hp_xz->Draw("colz");
     }
     c_xz->Update();
     padsav->cd();
@@ -304,12 +307,11 @@ void dynamic_exec() {
         hp_xy->SetTickLength(0.01, "X");
         hp_xy->SetTickLength(0.02, "Y");
         hp_xy->SetTitleOffset(1.30, "Y");
-        hp_xy->SetZTitle("Number of Entries");
+        hp_xy->SetZTitle("");
         hp_xy->SetStats(false);
         hp_xy->SetMinimum(0);
         hp_xy->SetMaximum(max_prob);
-        c_xy->SetTicks(1,1);
-        hp_xy->Draw("col");
+        hp_xy->Draw("colz");
     }
     c_xy->Update();
     padsav->cd();
