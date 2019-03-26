@@ -12,8 +12,12 @@ float max_prob = 0;
 
 void gerdatomography() {
 
+    if (gROOT->GetVersionInt() < 60900) {
+        std::cerr << "ERROR: this program works properly with ROOT >= 6.09\n";
+        gSystem->Exit(1);
+    }
     std::string filename = OpenFileDialog();
-    if (filename.empty()) { return; gSystem->Exit(0); }
+    if (filename.empty()) { gSystem->Exit(0); }
 
     TFile* tfile = new TFile(filename.c_str(), "read");
     auto LAr_prob_map = dynamic_cast<TH3D*>(tfile->Get("LAr_prob_map"));
