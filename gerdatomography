@@ -10,21 +10,10 @@ void dynamic_exec();
 
 float max_prob = 0;
 
-void gerda_tomography() {
-
-    auto font = 43;
-    auto fontsize = 22;
-    // gStyle->SetPaperSize(18, 10);
-    // gStyle->SetTextFont(font);
-    // gStyle->SetTextSize(fontsize);
-    // gStyle->SetLabelFont(font, "XYZ");
-    // gStyle->SetLabelSize(fontsize, "XYZ");
-    // gStyle->SetTitleFont(font, "XYZ");
-    // gStyle->SetTitleSize(fontsize, "XYZ");
-    // gStyle->SetTitleFont(font, "T");
-    // gStyle->SetTitleSize(fontsize, "T");
+void gerdatomography() {
 
     std::string filename = OpenFileDialog();
+    if (filename.empty()) { return; gSystem->Exit(0); }
 
     TFile* tfile = new TFile(filename.c_str(), "read");
     auto LAr_prob_map = dynamic_cast<TH3D*>(tfile->Get("LAr_prob_map"));
@@ -338,7 +327,8 @@ const std::string OpenFileDialog() {
    fi.fFileTypes = gOpenAsTypes;
    new TGFileDialog(gClient->GetRoot(), gClient->GetRoot(), kFDOpen, &fi);
 
-   return std::string(fi.fFilename);
+   if (fi.fFilename) return std::string(fi.fFilename);
+   else return "";
 }
 
 // vim: filetype=cpp
