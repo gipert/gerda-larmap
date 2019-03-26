@@ -1,0 +1,344 @@
+//usr/bin/env root -l $0; exit $?
+/* gerda_tomography.C
+ *
+ * Author: Luigi Pertoldi - pertoldi@pd.infn.it
+ * Created: Sun 24 Mar 2019
+ */
+
+const std::string OpenFileDialog();
+void dynamic_exec();
+
+float max_prob = 0;
+
+void gerda_tomography() {
+
+    auto font = 43;
+    auto fontsize = 22;
+    // gStyle->SetPaperSize(18, 10);
+    // gStyle->SetTextFont(font);
+    // gStyle->SetTextSize(fontsize);
+    // gStyle->SetLabelFont(font, "XYZ");
+    // gStyle->SetLabelSize(fontsize, "XYZ");
+    // gStyle->SetTitleFont(font, "XYZ");
+    // gStyle->SetTitleSize(fontsize, "XYZ");
+    // gStyle->SetTitleFont(font, "T");
+    // gStyle->SetTitleSize(fontsize, "T");
+
+    std::string filename = OpenFileDialog();
+
+    TFile* tfile = new TFile(filename.c_str(), "read");
+    auto LAr_prob_map = dynamic_cast<TH3D*>(tfile->Get("LAr_prob_map"));
+
+    std::cout << "INFO: preparing histogram...\n";
+    // this is needed for a meaningful rebin...
+    for (int i = 0; i < LAr_prob_map->GetNcells(); ++i) {
+        auto _p = LAr_prob_map->GetBinContent(i);
+        if (_p < 0) LAr_prob_map->SetBinContent(i, 0);
+        if (_p > max_prob) max_prob = _p;
+    }
+    auto factor = 2;
+    LAr_prob_map->Rebin3D(factor, factor, factor);
+    LAr_prob_map->Scale(1./(factor*factor*factor));
+
+    std::cout << "INFO: displaying...\n";
+    auto canvas = new TCanvas(
+        "gerda_tomography", "GERDA Tomography",
+        1800, 1000
+    );
+    auto main_pad = new TPad(
+        "main_pad", "Main Pad",
+        0.0, 0.0, 0.33, 1.0
+    );
+    main_pad->SetMargin(0, 0, 0, 0);
+    auto xz_pad = new TPad(
+        "xz_pad", "XZ Projection Pad",
+        0.33, 0.0, 0.66, 1.0
+    );
+    xz_pad->SetLogz();
+    xz_pad->SetGrid();
+    xz_pad->SetTopMargin(0.1);
+    auto xy_pad = new TPad(
+        "xy_pad", "XY Projection Pad",
+        0.66, 0.3, 1.0, 1.0
+    );
+    xy_pad->SetLogz();
+    xy_pad->SetGrid();
+    xy_pad->SetTopMargin(0.14);
+
+    main_pad->Draw();
+    xz_pad->Draw();
+    xy_pad->Draw();
+
+    main_pad->cd();
+    LAr_prob_map->SetTitle("LAr photon detection probability map;x [cm];y [cm];z [cm]");
+    LAr_prob_map->SetStats(false);
+    LAr_prob_map->SetMinimum(0);
+    LAr_prob_map->SetMaximum(max_prob);
+    LAr_prob_map->Draw("a fb bb lego");
+
+    main_pad->AddExec("dynamic", "dynamic_exec()");
+
+    return;
+}
+
+void dynamic_exec() {
+
+    auto nbins = 1;
+
+    auto *select = gPad->GetSelected();
+    if (!select) return;
+    if (!select->InheritsFrom(TH3::Class())) { gPad->SetUniqueID(0); return; }
+    auto h = dynamic_cast<TH3D*>(select);
+    gPad->GetCanvas()->FeedbackMode(true);
+
+    int pyold = gPad->GetUniqueID();
+    int px = gPad->GetEventX();
+    int py = gPad->GetEventY();
+
+    // Erase old position and draw a line at current position
+    auto view = gPad->GetView();
+    if (!view) return;
+    auto xaxis = h->GetXaxis();
+    auto yaxis = h->GetYaxis();
+    auto zaxis = h->GetZaxis();
+
+    double u_xz[3], xx_xz[3];
+    double u_xy[3], xx_xy[3];
+
+    static TPoint rect1_xz[5]; // store vertices of the polyline (rectangle), initialsed 0 by default
+    static TPoint rect2_xz[5]; // second rectangle when slice thickness > 1 bin thickness
+    static TPoint rect1_xy[5];
+    static TPoint rect2_xy[5];
+
+    // static TPolyLine pline_xz;
+    // static TPolyLine pline_xy;
+    // pline_xz.SetNDC(false);
+    // pline_xy.SetNDC(false);
+
+    Double_t uxmin = gPad->GetUxmin();
+    Double_t uxmax = gPad->GetUxmax();
+    Double_t uymin = gPad->GetUymin();
+    Double_t uymax = gPad->GetUymax();
+
+    int pxmin = gPad->XtoAbsPixel(uxmin);
+    int pxmax = gPad->XtoAbsPixel(uxmax);
+    if (pxmin == pxmax) return;
+    int pymin = gPad->YtoAbsPixel(uymin);
+    int pymax = gPad->YtoAbsPixel(uymax);
+    if (pymin == pymax) return;
+    Double_t cx = (pxmax-pxmin)/(uxmax-uxmin);
+    Double_t cy = (pymax-pymin)/(uymax-uymin);
+    auto padsav = gPad;
+    auto c_xz = dynamic_cast<TPad*>(
+         dynamic_cast<TVirtualPad*>(
+             gROOT->GetListOfCanvases()->FindObject("gerda_tomography"))
+         ->GetListOfPrimitives()->FindObject("xz_pad"));
+    if (!c_xz) return;
+
+    // xz polylines
+    int first_xz = yaxis->GetFirst();
+    int last_xz  = yaxis->GetLast();
+    int biny_xz = first_xz + int((last_xz-first_xz)*(py-pymin)/(pymax-pymin));
+    int biny2_xz = TMath::Min(biny_xz+nbins-1,yaxis->GetNbins() );
+    yaxis->SetRange(biny_xz,biny2_xz);
+    if (rect1_xz[0].GetX()) {
+        // pline_xz.Draw();
+        gVirtualX->DrawPolyLine(5, rect1_xz);
+    }
+    if (nbins > 1 and rect1_xz[0].GetX()) gVirtualX->DrawPolyLine(5,rect2_xz);
+    xx_xz[0] = xaxis->GetXmin();
+    xx_xz[2] = zaxis->GetXmax();
+    xx_xz[1] = yaxis->GetBinCenter(biny_xz);
+    view->WCtoNDC(xx_xz,u_xz);
+    rect1_xz[0].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
+    rect1_xz[0].SetY(pymin + int((u_xz[1]-uymin)*cy));
+    rect1_xz[4].SetX(rect1_xz[0].GetX());
+    rect1_xz[4].SetY(rect1_xz[0].GetY());
+    xx_xz[0] = xaxis->GetXmax();
+    view->WCtoNDC(xx_xz,u_xz);
+    rect1_xz[1].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
+    rect1_xz[1].SetY(pymin + int((u_xz[1]-uymin)*cy));
+    xx_xz[2] = zaxis->GetXmin();
+    view->WCtoNDC(xx_xz,u_xz);
+    rect1_xz[2].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
+    rect1_xz[2].SetY(pymin + int((u_xz[1]-uymin)*cy));
+    xx_xz[0] = xaxis->GetXmin();
+    view->WCtoNDC(xx_xz,u_xz);
+    rect1_xz[3].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
+    rect1_xz[3].SetY(pymin + int((u_xz[1]-uymin)*cy));
+    gVirtualX->DrawPolyLine(5,rect1_xz);
+
+    // double _tmp_x[5], _tmp_y[5];
+    // for (int i = 0; i < 5; ++i) {
+    //     _tmp_x[i] = rect1_xz[i].GetX();
+    //     _tmp_y[i] = rect1_xz[i].GetY();
+    // }
+    // pline_xz.SetPolyLine(5, _tmp_x, _tmp_y);
+    // pline_xz.Draw();
+
+    if (nbins > 1) {
+        xx_xz[0] = xaxis->GetXmin();
+        xx_xz[2] = zaxis->GetXmax();
+        xx_xz[1] = yaxis->GetBinCenter(biny_xz+nbins-1);
+        view->WCtoNDC(xx_xz,u_xz);
+        rect2_xz[0].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
+        rect2_xz[0].SetY(pymin + int((u_xz[1]-uymin)*cy));
+        rect2_xz[4].SetX(rect2_xz[0].GetX());
+        rect2_xz[4].SetY(rect2_xz[0].GetY());
+        xx_xz[0] = xaxis->GetXmax();
+        view->WCtoNDC(xx_xz,u_xz);
+        rect2_xz[1].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
+        rect2_xz[1].SetY(pymin + int((u_xz[1]-uymin)*cy));
+        xx_xz[2] = zaxis->GetXmin();
+        view->WCtoNDC(xx_xz,u_xz);
+        rect2_xz[2].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
+        rect2_xz[2].SetY(pymin + int((u_xz[1]-uymin)*cy));
+        xx_xz[0] = xaxis->GetXmin();
+        view->WCtoNDC(xx_xz,u_xz);
+        rect2_xz[3].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
+        rect2_xz[3].SetY(pymin + int((u_xz[1]-uymin)*cy));
+        gVirtualX->DrawPolyLine(5,rect2_xz);
+    }
+
+    auto c_xy = dynamic_cast<TPad*>(
+         dynamic_cast<TVirtualPad*>(
+             gROOT->GetListOfCanvases()->FindObject("gerda_tomography"))
+         ->GetListOfPrimitives()->FindObject("xy_pad"));
+    if (!c_xy) return;
+
+    c_xz->Clear();
+    c_xz->cd();
+    auto hp_xz = dynamic_cast<TH2*>(h->Project3D("zx"));
+    yaxis->SetRange(first_xz, last_xz);
+    if (hp_xz) {
+        hp_xz->SetFillColor(38);
+        if (nbins == 1) {
+            hp_xz->SetTitle(
+                TString::Format("XZ slice - bin %d, y #in [%.1f, %.f]",
+                    biny_xz, yaxis->GetBinLowEdge(biny_xz), yaxis->GetBinUpEdge(biny_xz))
+            );
+        }
+        else {
+            hp_xz->SetTitle(
+                TString::Format("Projection ZX, biny=[%d,%d] [y=%.1f..%.1f]",
+                    biny_xz, biny2_xz, yaxis->GetBinLowEdge(biny_xz), yaxis->GetBinUpEdge(biny2_xz))
+            );
+        }
+        hp_xz->SetXTitle(h->GetXaxis()->GetTitle());
+        hp_xz->SetYTitle(h->GetZaxis()->GetTitle());
+        hp_xz->SetTickLength(0.01, "X");
+        hp_xz->SetTickLength(0.02, "Y");
+        hp_xz->SetTitleOffset(1.30, "Y");
+        hp_xz->SetZTitle("");
+        hp_xz->SetStats(false);
+        hp_xz->SetMinimum(0);
+        hp_xz->SetMaximum(max_prob);
+        c_xz->SetTicks(1,1);
+        hp_xz->Draw("col");
+    }
+    c_xz->Update();
+    padsav->cd();
+
+    // xy projection
+    int first_xy = zaxis->GetFirst();
+    int last_xy  = zaxis->GetLast();
+    int binz_xy  = first_xy + int((last_xy-first_xy)*(py-pymin)/(pymax-pymin));
+    int binz2_xy = TMath::Min(binz_xy+nbins-1, zaxis->GetNbins());
+    zaxis->SetRange(binz_xy,binz2_xy);
+    if (rect1_xy[0].GetX())              gVirtualX->DrawPolyLine(5,rect1_xy);
+    if (nbins > 1 && rect2_xy[0].GetX()) gVirtualX->DrawPolyLine(5,rect2_xy);
+    xx_xy[0] = xaxis->GetXmin();
+    xx_xy[1] = yaxis->GetXmax();
+    xx_xy[2] = zaxis->GetBinCenter(binz_xy);
+    view->WCtoNDC(xx_xy,u_xy);
+    rect1_xy[0].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+    rect1_xy[0].SetY(pymin + int((u_xy[1]-uymin)*cy));
+    rect1_xy[4].SetX(rect1_xy[0].GetX());
+    rect1_xy[4].SetY(rect1_xy[0].GetY());
+    xx_xy[0] = xaxis->GetXmax();
+    view->WCtoNDC(xx_xy,u_xy);
+    rect1_xy[1].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+    rect1_xy[1].SetY(pymin + int((u_xy[1]-uymin)*cy));
+    xx_xy[1] = yaxis->GetXmin();
+    view->WCtoNDC(xx_xy,u_xy);
+    rect1_xy[2].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+    rect1_xy[2].SetY(pymin + int((u_xy[1]-uymin)*cy));
+    xx_xy[0] = xaxis->GetXmin();
+    view->WCtoNDC(xx_xy,u_xy);
+    rect1_xy[3].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+    rect1_xy[3].SetY(pymin + int((u_xy[1]-uymin)*cy));
+    gVirtualX->DrawPolyLine(5, rect1_xy);
+    if (nbins > 1) {
+        xx_xy[0] = xaxis->GetXmin();
+        xx_xy[1] = yaxis->GetXmax();
+        xx_xy[2] = zaxis->GetBinCenter(binz_xy+nbins-1);
+        view->WCtoNDC(xx_xy,u_xy);
+        rect2_xy[0].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+        rect2_xy[0].SetY(pymin + int((u_xy[1]-uymin)*cy));
+        rect2_xy[4].SetX(rect2_xy[0].GetX());
+        rect2_xy[4].SetY(rect2_xy[0].GetY());
+        xx_xy[0] = xaxis->GetXmax();
+        view->WCtoNDC(xx_xy,u_xy);
+        rect2_xy[1].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+        rect2_xy[1].SetY(pymin + int((u_xy[1]-uymin)*cy));
+        xx_xy[1] = yaxis->GetXmin();
+        view->WCtoNDC(xx_xy,u_xy);
+        rect2_xy[2].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+        rect2_xy[2].SetY(pymin + int((u_xy[1]-uymin)*cy));
+        xx_xy[0] = xaxis->GetXmin();
+        view->WCtoNDC(xx_xy,u_xy);
+        rect2_xy[3].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+        rect2_xy[3].SetY(pymin + int((u_xy[1]-uymin)*cy));
+        gVirtualX->DrawPolyLine(5, rect2_xy);
+    }
+
+    c_xy->Clear();
+    c_xy->cd();
+    auto hp_xy = dynamic_cast<TH2*>(h->Project3D("xy"));
+    zaxis->SetRange(first_xy, last_xy);
+    if (hp_xy) {
+        hp_xy->SetFillColor(38);
+        if (nbins == 1) hp_xy->SetTitle(
+            TString::Format("XY slice - bin %d, z #in [%.1f, %.f]",
+                binz_xy, zaxis->GetBinLowEdge(binz_xy), zaxis->GetBinUpEdge(binz_xy))
+        );
+        else hp_xy->SetTitle(
+            TString::Format("XY projection, binz=[%d,%d] [z=%.1f..%.1f]",
+                binz_xy, binz2_xy, zaxis->GetBinLowEdge(binz_xy), zaxis->GetBinUpEdge(binz2_xy))
+        );
+        hp_xy->SetXTitle(h->GetYaxis()->GetTitle());
+        hp_xy->SetYTitle(h->GetXaxis()->GetTitle());
+        hp_xy->SetTickLength(0.01, "X");
+        hp_xy->SetTickLength(0.02, "Y");
+        hp_xy->SetTitleOffset(1.30, "Y");
+        hp_xy->SetZTitle("Number of Entries");
+        hp_xy->SetStats(false);
+        hp_xy->SetMinimum(0);
+        hp_xy->SetMaximum(max_prob);
+        c_xy->SetTicks(1,1);
+        hp_xy->Draw("col");
+    }
+    c_xy->Update();
+    padsav->cd();
+}
+
+const std::string OpenFileDialog() {
+   // Prompt for file to be opened. Depending on navigation in
+   // dialog the current working directory can be changed.
+   // The returned file name is always with respect to the
+   // current directory.
+
+   const char *gOpenAsTypes[] = {
+      "ROOT files",   "*.root",
+      "All files",    "*",
+       0,              0
+   };
+
+   static TGFileInfo fi;
+   fi.fFileTypes = gOpenAsTypes;
+   new TGFileDialog(gClient->GetRoot(), gClient->GetRoot(), kFDOpen, &fi);
+
+   return std::string(fi.fFilename);
+}
+
+// vim: filetype=cpp
