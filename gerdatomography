@@ -1,4 +1,4 @@
-//usr/bin/env root -l $0; exit $?
+//usr/bin/env root -l ${0}\(2\); exit $?
 /* gerda_tomography.C
  *
  * Author: Luigi Pertoldi - pertoldi@pd.infn.it
@@ -10,12 +10,14 @@ void dynamic_exec();
 
 float max_prob = 0;
 
-void gerdatomography() {
+void gerdatomography(int rebin = 2) {
 
     if (gROOT->GetVersionInt() < 60900) {
         std::cerr << "ERROR: this program works properly with ROOT >= 6.09\n";
         gSystem->Exit(1);
     }
+
+    // ask for input file
     std::string filename = OpenFileDialog();
     if (filename.empty()) { gSystem->Exit(0); }
 
@@ -29,15 +31,21 @@ void gerdatomography() {
         if (_p < 0) LAr_prob_map->SetBinContent(i, 0);
         if (_p > max_prob) max_prob = _p;
     }
-    auto factor = 2;
-    LAr_prob_map->Rebin3D(factor, factor, factor);
-    LAr_prob_map->Scale(1./(factor*factor*factor));
+
+    // eventually rebin
+    LAr_prob_map->Rebin3D(rebin, rebin, rebin);
+    LAr_prob_map->Scale(1./(rebin*rebin*rebin));
 
     std::cout << "INFO: displaying, this could take a while...\n";
     auto canvas = new TCanvas(
         "gerda_tomography", "GERDA Tomography",
         1800, 1000
     );
+
+    // this should enable the "invert" drawing mode
+    // if a shape is re-drawn then it should disappear
+    canvas->FeedbackMode(true);
+
     auto main_pad = new TPad(
         "main_pad", "Main Pad",
         0.0, 0.0, 0.33, 1.0
@@ -73,6 +81,34 @@ void gerdatomography() {
     LAr_prob_map->SetMaximum(max_prob);
     LAr_prob_map->Draw("a fb bb lego");
 
+    // pre-draw something
+    auto hp_xz = dynamic_cast<TH2*>(LAr_prob_map->Project3D("zx"));
+    hp_xz->Reset();
+    hp_xz->SetTickLength(0.01, "X");
+    hp_xz->SetTickLength(0.02, "Y");
+    hp_xz->SetTitleOffset(1.30, "Y");
+    hp_xz->SetZTitle("");
+    hp_xz->SetStats(false);
+    hp_xz->SetMinimum(0);
+    hp_xz->SetMaximum(max_prob);
+    hp_xz->SetTitle("XZ slice");
+    xz_pad->cd();
+    hp_xz->Draw("colz");
+
+    auto hp_xy = dynamic_cast<TH2*>(LAr_prob_map->Project3D("xy"));
+    hp_xy->Reset();
+    hp_xy->SetTickLength(0.01, "X");
+    hp_xy->SetTickLength(0.02, "Y");
+    hp_xy->SetTitleOffset(1.30, "Y");
+    hp_xy->SetZTitle("");
+    hp_xy->SetStats(false);
+    hp_xy->SetMinimum(0);
+    hp_xy->SetMaximum(max_prob);
+    hp_xy->SetTitle("XY slice");
+    xy_pad->cd();
+    hp_xy->Draw("colz");
+
+    // attach dynamic behaviour
     main_pad->AddExec("dynamic", "dynamic_exec()");
 
     return;
@@ -82,35 +118,25 @@ void dynamic_exec() {
 
     auto nbins = 1;
 
+    // check if mouse pointer is in the correct region
     auto *select = gPad->GetSelected();
-    if (!select) return;
-    if (!select->InheritsFrom(TH3::Class())) { gPad->SetUniqueID(0); return; }
-    auto h = dynamic_cast<TH3D*>(select);
-    gPad->GetCanvas()->FeedbackMode(true);
+    if (!select or !select->InheritsFrom(TH3::Class())) return;
+    auto h = dynamic_cast<TH3*>(select);
 
-    int pyold = gPad->GetUniqueID();
+    // mouse pointer position
     int px = gPad->GetEventX();
     int py = gPad->GetEventY();
 
-    // Erase old position and draw a line at current position
     auto view = gPad->GetView();
     if (!view) return;
-    auto xaxis = h->GetXaxis();
-    auto yaxis = h->GetYaxis();
-    auto zaxis = h->GetZaxis();
 
     double u_xz[3], xx_xz[3];
     double u_xy[3], xx_xy[3];
 
     static TPoint rect1_xz[5]; // store vertices of the polyline (rectangle), initialsed 0 by default
-    static TPoint rect2_xz[5]; // second rectangle when slice thickness > 1 bin thickness
+    // static TPoint rect2_xz[5]; // second rectangle when slice thickness > 1 bin thickness
     static TPoint rect1_xy[5];
-    static TPoint rect2_xy[5];
-
-    // static TPolyLine pline_xz;
-    // static TPolyLine pline_xy;
-    // pline_xz.SetNDC(false);
-    // pline_xy.SetNDC(false);
+    // static TPoint rect2_xy[5];
 
     Double_t uxmin = gPad->GetUxmin();
     Double_t uxmax = gPad->GetUxmax();
@@ -125,104 +151,167 @@ void dynamic_exec() {
     if (pymin == pymax) return;
     Double_t cx = (pxmax-pxmin)/(uxmax-uxmin);
     Double_t cy = (pymax-pymin)/(uymax-uymin);
-    auto padsav = gPad;
-    auto c_xz = dynamic_cast<TPad*>(
-         dynamic_cast<TVirtualPad*>(
-             gROOT->GetListOfCanvases()->FindObject("gerda_tomography"))
-         ->GetListOfPrimitives()->FindObject("xz_pad"));
+
+    auto main_pad = gPad;
+    auto canvas = dynamic_cast<TCanvas*>(gPad->GetCanvas());
+
+    auto xaxis = h->GetXaxis();
+    auto yaxis = h->GetYaxis();
+    auto zaxis = h->GetZaxis();
+
+    /////////////////
+    // xz polyline //
+    /////////////////
+
+    auto c_xz = dynamic_cast<TPad*>(canvas->GetListOfPrimitives()->FindObject("xz_pad"));
     if (!c_xz) return;
 
-    // xz polylines
+    // erase old polyline
+    if (rect1_xz[0].GetX()) gVirtualX->DrawPolyLine(5, rect1_xz);
+    // if (nbins > 1 and rect1_xz[0].GetX()) gVirtualX->DrawPolyLine(5,rect2_xz);
+
+    // compute polyline
     int first_xz = yaxis->GetFirst();
     int last_xz  = yaxis->GetLast();
     int biny_xz = first_xz + int((last_xz-first_xz)*(py-pymin)/(pymax-pymin));
-    int biny2_xz = TMath::Min(biny_xz+nbins-1,yaxis->GetNbins() );
-    yaxis->SetRange(biny_xz,biny2_xz);
-    if (rect1_xz[0].GetX()) {
-        // pline_xz.Draw();
-        gVirtualX->DrawPolyLine(5, rect1_xz);
-    }
-    if (nbins > 1 and rect1_xz[0].GetX()) gVirtualX->DrawPolyLine(5,rect2_xz);
+    int biny2_xz = TMath::Min(biny_xz+nbins-1, yaxis->GetNbins());
+    yaxis->SetRange(biny_xz, biny2_xz);
     xx_xz[0] = xaxis->GetXmin();
     xx_xz[2] = zaxis->GetXmax();
     xx_xz[1] = yaxis->GetBinCenter(biny_xz);
-    view->WCtoNDC(xx_xz,u_xz);
+    view->WCtoNDC(xx_xz, u_xz);
     rect1_xz[0].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
     rect1_xz[0].SetY(pymin + int((u_xz[1]-uymin)*cy));
     rect1_xz[4].SetX(rect1_xz[0].GetX());
     rect1_xz[4].SetY(rect1_xz[0].GetY());
     xx_xz[0] = xaxis->GetXmax();
-    view->WCtoNDC(xx_xz,u_xz);
+    view->WCtoNDC(xx_xz, u_xz);
     rect1_xz[1].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
     rect1_xz[1].SetY(pymin + int((u_xz[1]-uymin)*cy));
     xx_xz[2] = zaxis->GetXmin();
-    view->WCtoNDC(xx_xz,u_xz);
+    view->WCtoNDC(xx_xz, u_xz);
     rect1_xz[2].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
     rect1_xz[2].SetY(pymin + int((u_xz[1]-uymin)*cy));
     xx_xz[0] = xaxis->GetXmin();
-    view->WCtoNDC(xx_xz,u_xz);
+    view->WCtoNDC(xx_xz, u_xz);
     rect1_xz[3].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
     rect1_xz[3].SetY(pymin + int((u_xz[1]-uymin)*cy));
-    gVirtualX->DrawPolyLine(5,rect1_xz);
 
-    // double _tmp_x[5], _tmp_y[5];
-    // for (int i = 0; i < 5; ++i) {
-    //     _tmp_x[i] = rect1_xz[i].GetX();
-    //     _tmp_y[i] = rect1_xz[i].GetY();
+    // if (nbins > 1) {
+    //     xx_xz[0] = xaxis->GetXmin();
+    //     xx_xz[2] = zaxis->GetXmax();
+    //     xx_xz[1] = yaxis->GetBinCenter(biny_xz+nbins-1);
+    //     view->WCtoNDC(xx_xz,u_xz);
+    //     rect2_xz[0].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
+    //     rect2_xz[0].SetY(pymin + int((u_xz[1]-uymin)*cy));
+    //     rect2_xz[4].SetX(rect2_xz[0].GetX());
+    //     rect2_xz[4].SetY(rect2_xz[0].GetY());
+    //     xx_xz[0] = xaxis->GetXmax();
+    //     view->WCtoNDC(xx_xz,u_xz);
+    //     rect2_xz[1].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
+    //     rect2_xz[1].SetY(pymin + int((u_xz[1]-uymin)*cy));
+    //     xx_xz[2] = zaxis->GetXmin();
+    //     view->WCtoNDC(xx_xz,u_xz);
+    //     rect2_xz[2].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
+    //     rect2_xz[2].SetY(pymin + int((u_xz[1]-uymin)*cy));
+    //     xx_xz[0] = xaxis->GetXmin();
+    //     view->WCtoNDC(xx_xz,u_xz);
+    //     rect2_xz[3].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
+    //     rect2_xz[3].SetY(pymin + int((u_xz[1]-uymin)*cy));
+    //     gVirtualX->DrawPolyLine(5,rect2_xz);
     // }
-    // pline_xz.SetPolyLine(5, _tmp_x, _tmp_y);
-    // pline_xz.Draw();
 
-    if (nbins > 1) {
-        xx_xz[0] = xaxis->GetXmin();
-        xx_xz[2] = zaxis->GetXmax();
-        xx_xz[1] = yaxis->GetBinCenter(biny_xz+nbins-1);
-        view->WCtoNDC(xx_xz,u_xz);
-        rect2_xz[0].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
-        rect2_xz[0].SetY(pymin + int((u_xz[1]-uymin)*cy));
-        rect2_xz[4].SetX(rect2_xz[0].GetX());
-        rect2_xz[4].SetY(rect2_xz[0].GetY());
-        xx_xz[0] = xaxis->GetXmax();
-        view->WCtoNDC(xx_xz,u_xz);
-        rect2_xz[1].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
-        rect2_xz[1].SetY(pymin + int((u_xz[1]-uymin)*cy));
-        xx_xz[2] = zaxis->GetXmin();
-        view->WCtoNDC(xx_xz,u_xz);
-        rect2_xz[2].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
-        rect2_xz[2].SetY(pymin + int((u_xz[1]-uymin)*cy));
-        xx_xz[0] = xaxis->GetXmin();
-        view->WCtoNDC(xx_xz,u_xz);
-        rect2_xz[3].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
-        rect2_xz[3].SetY(pymin + int((u_xz[1]-uymin)*cy));
-        gVirtualX->DrawPolyLine(5,rect2_xz);
-    }
+    ///////////////////
+    // xy projection //
+    ///////////////////
 
-    auto c_xy = dynamic_cast<TPad*>(
-         dynamic_cast<TVirtualPad*>(
-             gROOT->GetListOfCanvases()->FindObject("gerda_tomography"))
-         ->GetListOfPrimitives()->FindObject("xy_pad"));
+    auto c_xy = dynamic_cast<TPad*>(canvas->GetListOfPrimitives()->FindObject("xy_pad"));
     if (!c_xy) return;
+
+    // erase old polyline
+    if (rect1_xy[0].GetX()) gVirtualX->DrawPolyLine(5, rect1_xy);
+    // if (nbins > 1 && rect2_xy[0].GetX()) gVirtualX->DrawPolyLine(5,rect2_xy);
+
+    // compute polyline
+    int first_xy = zaxis->GetFirst();
+    int last_xy  = zaxis->GetLast();
+    int binz_xy  = first_xy + int((last_xy-first_xy)*(py-pymin)/(pymax-pymin));
+    int binz2_xy = TMath::Min(binz_xy+nbins-1, zaxis->GetNbins());
+    zaxis->SetRange(binz_xy, binz2_xy);
+    xx_xy[0] = xaxis->GetXmin();
+    xx_xy[1] = yaxis->GetXmax();
+    xx_xy[2] = zaxis->GetBinCenter(binz_xy);
+    view->WCtoNDC(xx_xy, u_xy);
+    rect1_xy[0].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+    rect1_xy[0].SetY(pymin + int((u_xy[1]-uymin)*cy));
+    rect1_xy[4].SetX(rect1_xy[0].GetX());
+    rect1_xy[4].SetY(rect1_xy[0].GetY());
+    xx_xy[0] = xaxis->GetXmax();
+    view->WCtoNDC(xx_xy, u_xy);
+    rect1_xy[1].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+    rect1_xy[1].SetY(pymin + int((u_xy[1]-uymin)*cy));
+    xx_xy[1] = yaxis->GetXmin();
+    view->WCtoNDC(xx_xy, u_xy);
+    rect1_xy[2].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+    rect1_xy[2].SetY(pymin + int((u_xy[1]-uymin)*cy));
+    xx_xy[0] = xaxis->GetXmin();
+    view->WCtoNDC(xx_xy, u_xy);
+    rect1_xy[3].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+    rect1_xy[3].SetY(pymin + int((u_xy[1]-uymin)*cy));
+
+    // if (nbins > 1) {
+    //     xx_xy[0] = xaxis->GetXmin();
+    //     xx_xy[1] = yaxis->GetXmax();
+    //     xx_xy[2] = zaxis->GetBinCenter(binz_xy+nbins-1);
+    //     view->WCtoNDC(xx_xy,u_xy);
+    //     rect2_xy[0].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+    //     rect2_xy[0].SetY(pymin + int((u_xy[1]-uymin)*cy));
+    //     rect2_xy[4].SetX(rect2_xy[0].GetX());
+    //     rect2_xy[4].SetY(rect2_xy[0].GetY());
+    //     xx_xy[0] = xaxis->GetXmax();
+    //     view->WCtoNDC(xx_xy,u_xy);
+    //     rect2_xy[1].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+    //     rect2_xy[1].SetY(pymin + int((u_xy[1]-uymin)*cy));
+    //     xx_xy[1] = yaxis->GetXmin();
+    //     view->WCtoNDC(xx_xy,u_xy);
+    //     rect2_xy[2].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+    //     rect2_xy[2].SetY(pymin + int((u_xy[1]-uymin)*cy));
+    //     xx_xy[0] = xaxis->GetXmin();
+    //     view->WCtoNDC(xx_xy,u_xy);
+    //     rect2_xy[3].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
+    //     rect2_xy[3].SetY(pymin + int((u_xy[1]-uymin)*cy));
+    //     gVirtualX->DrawPolyLine(5, rect2_xy);
+    // }
 
     c_xz->Clear();
     c_xz->cd();
+
+    // restore axis props
+    zaxis->UnZoom();
+    yaxis->SetRange(biny_xz, biny2_xz);
+
+    // delete old projection
+    auto hp_xz_old = dynamic_cast<TH2*>(canvas->GetListOfPrimitives()->FindObject("LAr_prob_map_zx"));
+    if (hp_xz_old) delete hp_xz_old;
+
+    // do the new projection
     auto hp_xz = dynamic_cast<TH2*>(h->Project3D("zx"));
+
     yaxis->SetRange(first_xz, last_xz);
+
     if (hp_xz) {
-        hp_xz->SetFillColor(38);
-        if (nbins == 1) {
+        // if (nbins == 1) {
             hp_xz->SetTitle(
                 TString::Format("XZ slice - bin %d, y #in [%.1f, %.f]",
                     biny_xz, yaxis->GetBinLowEdge(biny_xz), yaxis->GetBinUpEdge(biny_xz))
             );
-        }
-        else {
-            hp_xz->SetTitle(
-                TString::Format("Projection ZX, biny=[%d,%d] [y=%.1f..%.1f]",
-                    biny_xz, biny2_xz, yaxis->GetBinLowEdge(biny_xz), yaxis->GetBinUpEdge(biny2_xz))
-            );
-        }
-        hp_xz->SetXTitle(h->GetXaxis()->GetTitle());
-        hp_xz->SetYTitle(h->GetZaxis()->GetTitle());
+        // }
+        // else {
+        //     hp_xz->SetTitle(
+        //         TString::Format("Projection ZX, biny=[%d,%d] [y=%.1f..%.1f]",
+        //             biny_xz, biny2_xz, yaxis->GetBinLowEdge(biny_xz), yaxis->GetBinUpEdge(biny2_xz))
+        //     );
+        // }
         hp_xz->SetTickLength(0.01, "X");
         hp_xz->SetTickLength(0.02, "Y");
         hp_xz->SetTitleOffset(1.30, "Y");
@@ -232,78 +321,35 @@ void dynamic_exec() {
         hp_xz->SetMaximum(max_prob);
         hp_xz->Draw("colz");
     }
-    c_xz->Update();
-    padsav->cd();
-
-    // xy projection
-    int first_xy = zaxis->GetFirst();
-    int last_xy  = zaxis->GetLast();
-    int binz_xy  = first_xy + int((last_xy-first_xy)*(py-pymin)/(pymax-pymin));
-    int binz2_xy = TMath::Min(binz_xy+nbins-1, zaxis->GetNbins());
-    zaxis->SetRange(binz_xy,binz2_xy);
-    if (rect1_xy[0].GetX())              gVirtualX->DrawPolyLine(5,rect1_xy);
-    if (nbins > 1 && rect2_xy[0].GetX()) gVirtualX->DrawPolyLine(5,rect2_xy);
-    xx_xy[0] = xaxis->GetXmin();
-    xx_xy[1] = yaxis->GetXmax();
-    xx_xy[2] = zaxis->GetBinCenter(binz_xy);
-    view->WCtoNDC(xx_xy,u_xy);
-    rect1_xy[0].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
-    rect1_xy[0].SetY(pymin + int((u_xy[1]-uymin)*cy));
-    rect1_xy[4].SetX(rect1_xy[0].GetX());
-    rect1_xy[4].SetY(rect1_xy[0].GetY());
-    xx_xy[0] = xaxis->GetXmax();
-    view->WCtoNDC(xx_xy,u_xy);
-    rect1_xy[1].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
-    rect1_xy[1].SetY(pymin + int((u_xy[1]-uymin)*cy));
-    xx_xy[1] = yaxis->GetXmin();
-    view->WCtoNDC(xx_xy,u_xy);
-    rect1_xy[2].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
-    rect1_xy[2].SetY(pymin + int((u_xy[1]-uymin)*cy));
-    xx_xy[0] = xaxis->GetXmin();
-    view->WCtoNDC(xx_xy,u_xy);
-    rect1_xy[3].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
-    rect1_xy[3].SetY(pymin + int((u_xy[1]-uymin)*cy));
-    gVirtualX->DrawPolyLine(5, rect1_xy);
-    if (nbins > 1) {
-        xx_xy[0] = xaxis->GetXmin();
-        xx_xy[1] = yaxis->GetXmax();
-        xx_xy[2] = zaxis->GetBinCenter(binz_xy+nbins-1);
-        view->WCtoNDC(xx_xy,u_xy);
-        rect2_xy[0].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
-        rect2_xy[0].SetY(pymin + int((u_xy[1]-uymin)*cy));
-        rect2_xy[4].SetX(rect2_xy[0].GetX());
-        rect2_xy[4].SetY(rect2_xy[0].GetY());
-        xx_xy[0] = xaxis->GetXmax();
-        view->WCtoNDC(xx_xy,u_xy);
-        rect2_xy[1].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
-        rect2_xy[1].SetY(pymin + int((u_xy[1]-uymin)*cy));
-        xx_xy[1] = yaxis->GetXmin();
-        view->WCtoNDC(xx_xy,u_xy);
-        rect2_xy[2].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
-        rect2_xy[2].SetY(pymin + int((u_xy[1]-uymin)*cy));
-        xx_xy[0] = xaxis->GetXmin();
-        view->WCtoNDC(xx_xy,u_xy);
-        rect2_xy[3].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
-        rect2_xy[3].SetY(pymin + int((u_xy[1]-uymin)*cy));
-        gVirtualX->DrawPolyLine(5, rect2_xy);
-    }
+    c_xy->Update();
 
     c_xy->Clear();
     c_xy->cd();
+
+    yaxis->UnZoom();
+    zaxis->SetRange(binz_xy, binz2_xy);
+
+    // delete old projection
+    auto hp_xy_old = dynamic_cast<TH2*>(canvas->GetListOfPrimitives()->FindObject("LAr_prob_map_xy"));
+    if (hp_xy_old) delete hp_xy_old;
+
+    // do the new projection
     auto hp_xy = dynamic_cast<TH2*>(h->Project3D("xy"));
+
     zaxis->SetRange(first_xy, last_xy);
+
     if (hp_xy) {
-        hp_xy->SetFillColor(38);
-        if (nbins == 1) hp_xy->SetTitle(
-            TString::Format("XY slice - bin %d, z #in [%.1f, %.f]",
-                binz_xy, zaxis->GetBinLowEdge(binz_xy), zaxis->GetBinUpEdge(binz_xy))
-        );
-        else hp_xy->SetTitle(
-            TString::Format("XY projection, binz=[%d,%d] [z=%.1f..%.1f]",
-                binz_xy, binz2_xy, zaxis->GetBinLowEdge(binz_xy), zaxis->GetBinUpEdge(binz2_xy))
-        );
-        hp_xy->SetXTitle(h->GetYaxis()->GetTitle());
-        hp_xy->SetYTitle(h->GetXaxis()->GetTitle());
+        // if (nbins == 1) {
+            hp_xy->SetTitle(
+                TString::Format("XY slice - bin %d, z #in [%.1f, %.f]",
+                    binz_xy, zaxis->GetBinLowEdge(binz_xy), zaxis->GetBinUpEdge(binz_xy))
+            );
+        // }
+        // else { hp_xy->SetTitle(
+        //     TString::Format("XY projection, binz=[%d,%d] [z=%.1f..%.1f]",
+        //         binz_xy, binz2_xy, zaxis->GetBinLowEdge(binz_xy), zaxis->GetBinUpEdge(binz2_xy))
+        //     );
+        // }
         hp_xy->SetTickLength(0.01, "X");
         hp_xy->SetTickLength(0.02, "Y");
         hp_xy->SetTitleOffset(1.30, "Y");
@@ -313,8 +359,13 @@ void dynamic_exec() {
         hp_xy->SetMaximum(max_prob);
         hp_xy->Draw("colz");
     }
-    c_xy->Update();
-    padsav->cd();
+    c_xz->Update();
+
+    main_pad->cd();
+
+    // draw the polylines
+    gVirtualX->DrawPolyLine(5, rect1_xy);
+    gVirtualX->DrawPolyLine(5, rect1_xz);
 }
 
 const std::string OpenFileDialog() {
