@@ -1,7 +1,7 @@
 /* map-merger.cc
  *
  * Merge two (or more) LAr probability maps.
- * USAGE: map-merger [-h] [-o outfile.root] file.root file.root [file.root ...]
+ * USAGE: map-merger [-o outfile.root] file.root file.root [file.root ...]
  *
  * Author: Luigi Pertoldi - pertoldi@pd.infn.it
  * Created: Sun 24 Mar 2019
@@ -28,11 +28,11 @@ int main(int argc, char** argv) {
     auto result2 = std::find(args.begin(), args.end(), "--output");
     if (result1 != args.end()) {
         outfile = *(result1+1);
-        args.erase(result1, result1+1);
+        args.erase(result1, result1+2);
     }
-    if (result2 != args.end()) {
+    else if (result2 != args.end()) {
         outfile = *(result2+1);
-        args.erase(result2, result2+1);
+        args.erase(result2, result2+2);
     }
 
     std::cout << "INFO: merging together ";
