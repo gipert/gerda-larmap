@@ -7,17 +7,20 @@ for i in `seq 0 9`; do
     [ ! -d out/00$i ]           && ./run-jobs-runid lar-vuv-complete.mac.template 100 00$i
     [ ! -d out/array-00$i ]     && ./run-jobs-runid lar-vuv-array.mac.template 100 array-00$i
     [ ! -d out/array-ext-00$i ] && ./run-jobs-runid lar-vuv-array-ext.mac.template 100 array-ext-00$i
+    [ ! -d out/outer-00$i ]     && ./run-jobs-runid lar-vuv-outer.mac.template 100 outer-00$i
 done
 
 for i in `seq 10 99`; do
+    [ ! -d out/0$i ]           && ./run-jobs-runid lar-vuv-complete.mac.template 100 0$i
     [ ! -d out/array-0$i ]     && ./run-jobs-runid lar-vuv-array.mac.template 100 array-0$i
     [ ! -d out/array-ext-0$i ] && ./run-jobs-runid lar-vuv-array-ext.mac.template 100 array-ext-0$i
+    [ ! -d out/outer-0$i ]     && ./run-jobs-runid lar-vuv-outer.mac.template 100 outer-0$i
 done
 
-for i in `seq 10 99`; do
-    [ ! -d out/0$i ] && ./run-jobs-runid lar-vuv-complete.mac.template 100 0$i
+for i in `seq 100 200`; do
+    [ ! -d out/array-$i ] && ./run-jobs-runid lar-vuv-array.mac.template 100 array-$i
 done
 
-for i in `seq 100 300`; do
-    [ ! -d out/$i ] && ./run-jobs-runid lar-vuv-complete.mac.template 100 $i
+for i in `seq 100 500`; do
+    [ ! -d out/$i ]       && ./run-jobs-runid lar-vuv-complete.mac.template 100 $i
 done
