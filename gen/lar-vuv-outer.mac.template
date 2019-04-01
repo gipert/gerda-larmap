@@ -45,11 +45,13 @@
 /gps/ang/type                                     iso
 /gps/polarization                                 1 1 1
 
-/MG/generator/Sampling/volume/name                Cylinder
-/MG/generator/Sampling/volume/innerCylinderRadius 23 cm
-/MG/generator/Sampling/volume/outerCylinderRadius 40 cm
-/MG/generator/Sampling/volume/cylinderHeight      220 cm
-/MG/generator/Sampling/volume/offsetCenterXPos    0 mm
-/MG/generator/Sampling/volume/offsetCenterZPos    5 cm
+/MG/generator/Sampling/volume/name                  Cylinder
+/MG/generator/Sampling/volume/innerCylinderRadius   23 cm
+/MG/generator/Sampling/volume/outerCylinderRadius   38.5 cm
+/MG/generator/Sampling/volume/cylinderStartingAngle 0 deg
+/MG/generator/Sampling/volume/cylinderSpanningAngle 10 deg
+/MG/generator/Sampling/volume/cylinderHeight        65 cm
+/MG/generator/Sampling/volume/offsetCenterXPos      0 mm
+/MG/generator/Sampling/volume/offsetCenterZPos      82.5 cm
 
-/run/beamOn                                       1000000
+/run/beamOn                                       25000000

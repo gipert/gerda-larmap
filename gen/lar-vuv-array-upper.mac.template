@@ -48,8 +48,8 @@
 /MG/generator/Sampling/volume/name                Cylinder
 /MG/generator/Sampling/volume/innerCylinderRadius 0 m
 /MG/generator/Sampling/volume/outerCylinderRadius 24 cm
-/MG/generator/Sampling/volume/cylinderHeight      220 cm
+/MG/generator/Sampling/volume/cylinderHeight      40 cm
 /MG/generator/Sampling/volume/offsetCenterXPos    0 mm
-/MG/generator/Sampling/volume/offsetCenterZPos    5 cm
+/MG/generator/Sampling/volume/offsetCenterZPos    30 cm
 
 /run/beamOn                                       25000000
