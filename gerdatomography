@@ -1,4 +1,4 @@
-//usr/bin/env root -l ${0}\(2\); exit $?
+//usr/bin/env root -l ${0}\(${1}\); exit $?
 /* gerda_tomography.C
  *
  * Author: Luigi Pertoldi - pertoldi@pd.infn.it
