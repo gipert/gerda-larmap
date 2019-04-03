@@ -11,9 +11,7 @@
 #$ -o /dev/null
 #$ -e /dev/null
 
-mkdir -p log out
-LOGFILE=log/create-larmap-$1.log
 singularity exec ../gerda-sw-all_dev.img \
     ../create-larmap ../settings \
                      "../gen/jobs/out/$1/phmap-*.root" \
-                     out/gerda-larmap-$1.root &> $LOGFILE
+                     out/gerda-larmap-$1.root &> log/create-larmap-$1.log

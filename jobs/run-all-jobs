@@ -3,8 +3,26 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 
+manager="none"
+[ `command -v qsub`          ] && manager="qsub"
+[ `command -v condor_submit` ] && manager="condor"
+
+[ "$manager" == "none" ] \
+      && echo 'ERROR: no supported job scheduler available!' \
+      && exit 1
+
+echo "INFO: using $manager cluster manager"
+
+[ ! -f ./run-all-jobs ] \
+    && echo "ERROR: must cd where 'run-all-jobs' is before running!" \
+    && exit
+
+mkdir -p log out
+
 for d in ../jobs/gen/out/*; do
     runid=`basename $d`
-    [ ! -f out/gerda-larmap-$runid.root ] && \
-        qsub -N larmap-$runid create-larmap.qsub $runid
+    if [ ! -f out/gerda-larmap-$runid.root ]; then
+        [ "$manager" == "qsub"   ] qsub -N larmap-$runid create-larmap.qsub $runid
+        [ "$manager" == "condor" ] condor_submit WORKDIR=`pwd` RUNID=$runid create-larmap.jdl
+    fi
 done

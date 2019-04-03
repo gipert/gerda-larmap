@@ -1,0 +1,14 @@
+initialdir = $(WORKDIR)
+output = $(WORKDIR)/log/create-larmap-$(RUNID).log
+error = $(WORKDIR)/log/create-larmap-$(RUNID).log
+log = /tmp/create-larmap.log.$(Cluster).$(Process)
+
+universe = docker
+docker_image = 10.64.28.50:5000/gerda-sw-all:gerda-optical
+
+executable = /usr/bin/time
+arguments = -v ../create-larmap ../settings \
+            "../gen/jobs/out/$(RUNID)/phmap-*.root" \
+            out/gerda-larmap-$(RUNID).root
+
+queue 1

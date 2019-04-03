@@ -1,7 +1,7 @@
 initialdir = $(WORKDIR)
 output = $(WORKDIR)/log/$(RUNID)/$Fn(macro).log
 error = $(WORKDIR)/log/$(RUNID)/$Fn(macro).log
-log = /common/pertoldi/tmp/log.log.$(Cluster).$(Process)
+log = /tmp/$Fn(macro).condor.log
 
 universe = docker
 docker_image = 10.64.28.50:5000/gerda-sw-all:gerda-optical
