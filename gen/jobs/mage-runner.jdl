@@ -1,0 +1,12 @@
+initialdir = $(WORKDIR)
+output = $(WORKDIR)/log/$(RUNID)/$Fn(macro).log
+error = $(WORKDIR)/log/$(RUNID)/$Fn(macro).log
+log = /common/pertoldi/tmp/log.log.$(Cluster).$(Process)
+
+universe = docker
+docker_image = 10.64.28.50:5000/gerda-sw-all:gerda-optical
+
+executable = /usr/bin/time
+arguments = -v MaGe --no-colors $(macro)
+
+queue macro matching files $(WORKDIR)/log/$(RUNID)/*.mac

@@ -5,6 +5,20 @@
 #
 # USAGE: ./run-jobs-runid <template-mac> <num-of-jobs> [<run-name>]
 
+manager="none"
+[ `command -v qsub`          ] && manager="qsub"
+[ `command -v condor_submit` ] && manager="condor"
+
+[ "$manager" == "none" ] \
+    && echo 'ERROR: no supported job scheduler available!' \
+    && exit 1
+
+echo "INFO: using $manager cluster manager"
+
+[ ! -f ./run-jobs-runid ] \
+    && echo "ERROR: must cd where 'run-jobs' is before running!" \
+    && exit
+
 if [ -z "$3" ]; then
     runid=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 7 ; echo ''`
     echo "INFO: using random run ID $runid"
@@ -13,21 +27,22 @@ else
     echo "INFO: using run ID $runid"
 fi
 
-[ ! -f ../../gerda-sw-all.img ] \
-    && echo "ERROR: missing Singularity container ../../gerda-sw-all.img" \
-    && exit
+if [ "$manager" == "qsub" ]; then
+    [ ! -f ../../gerda-sw-all.img ] \
+        && echo "ERROR: missing Singularity container ../../gerda-sw-all.img" \
+        && exit
 
-[ ! -f ./run-jobs-runid ] \
-    && echo "ERROR: must cd where 'run-jobs' is before running!" \
-    && exit
+    echo "INFO: using ../../gerda-sw-all.img container"
+fi
 
 mkdir -p out/$runid log/$runid
-echo "INFO: using ../../gerda-sw-all.img container"
 
 for i in `seq 1 $2`; do
     stamp=`date +%s%N | cut -b1-13`
-    sed -e "s/\${OUTNAME}/out\/$runid\/phmap-$stamp.root/g" $1 > log/$runid/phmap-$stamp.mac
-    qsub -N mage-$runid-$stamp mage-runner.qsub log/$runid/phmap-$stamp.mac
+    sed -e "s|\${OUTNAME}|`pwd`/out/$runid/phmap-$stamp.root|g" $1 > log/$runid/phmap-$stamp.mac
+    [ "$manager" == "qsub" ] && qsub -N mage-$runid-$stamp mage-runner.qsub log/$runid/phmap-$stamp.mac
 done
 
-echo "INFO: $2 jobs for run ID $runid successfully submitted to qsub"
+[ "$manager" == "condor" ] && condor_submit RUNID=$runid WORKDIR=`pwd` mage-runner.jdl
+
+echo "INFO: $2 jobs for run ID $runid successfully submitted to $manager"
