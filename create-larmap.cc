@@ -30,7 +30,7 @@ bool divide_maps(TH3D *h1, const TH3D *h2);
 int main(int argc, char** argv) {
 
     // load JSON settings
-    auto configdir = argc > 1 ? argv[1] : "settings";
+    auto configdir = argc > 1 ? std::string(argv[1]) : "settings";
     katrin::KTree config;
     try { katrin::KTreeFile(configdir + "/prob-map-settings.json").Read(config); }
     catch (katrin::KException &e) { std::cerr << e.what() << std::endl; }
