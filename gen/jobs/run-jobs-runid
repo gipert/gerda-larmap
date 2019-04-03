@@ -43,6 +43,6 @@ for i in `seq 1 $2`; do
     [ "$manager" == "qsub" ] && qsub -N mage-$runid-$stamp mage-runner.qsub log/$runid/phmap-$stamp.mac
 done
 
-[ "$manager" == "condor" ] && condor_submit RUNID=$runid WORKDIR=`pwd` mage-runner.jdl
+[ "$manager" == "condor" ] && condor_submit -batch-name mage-$runid RUNID=$runid WORKDIR=`pwd` mage-runner.jdl
 
 echo "INFO: $2 jobs for run ID $runid successfully submitted to $manager"
