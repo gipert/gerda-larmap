@@ -3,7 +3,7 @@
  * Author: Luigi Pertoldi - pertoldi@pd.infn.it
  * Created: Sun 24 Mar 2019
  *
- * USAGE: create-larmap [<settings.json>] [<MaGe-filelist>] [<output-filename>]
+ * USAGE: create-larmap [<settings-dir>] [<MaGe-filelist>] [<output-filename>]
  *
  */
 #include <iostream>
@@ -30,9 +30,9 @@ bool divide_maps(TH3D *h1, const TH3D *h2);
 int main(int argc, char** argv) {
 
     // load JSON settings
-    auto configname = argc > 1 ? argv[1] : "settings/prob-map-settings.json";
+    auto configdir = argc > 1 ? argv[1] : "settings";
     katrin::KTree config;
-    try { katrin::KTreeFile(configname).Read(config); }
+    try { katrin::KTreeFile(configdir + "/prob-map-settings.json").Read(config); }
     catch (katrin::KException &e) { std::cerr << e.what() << std::endl; }
 
     // open MaGe files
@@ -59,8 +59,8 @@ int main(int argc, char** argv) {
 
     // set up the Tier4izer
     gada::T4SimConfig simConfig;
-    simConfig.LoadMapping("settings/mapping-spmMerged.json");
-    simConfig.LoadLArSettings("settings/lar-settings-55cm_0.50cov.json");
+    simConfig.LoadMapping(configdir + "/mapping-spmMerged.json");
+    simConfig.LoadLArSettings(configdir + "/lar-settings-55cm_0.50cov.json");
 
     gada::T4SimHandler simHandler(&chain, &simConfig);
     simHandler.SetBranchAddresses();

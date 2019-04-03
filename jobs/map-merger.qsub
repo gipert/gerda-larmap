@@ -3,13 +3,13 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 #
-# USAGE: qsub map-merger.qsub <work-dir> <job-name> <file1.root> <file2.root> [<filen.root>]
+# USAGE: qsub map-merger.qsub <job-name> <file1.root> <file2.root> [<filen.root>]
 #
 #$ -P short ### queue
 #$ -j y     ### have logoutput and erroroutput in the same file
+#$ -cwd
 ##$ -o /dev/null
 ##$ -e /dev/null
 
-cd $1
 mkdir -p out
-singularity exec gerda-sw-all_dev.img ./map-merger -o out/gerda-larmap-merged-$2.root "${@:3}"
+singularity exec ../gerda-sw-all_dev.img ../map-merger -o out/gerda-larmap-merged-$1.root "${@:2}"

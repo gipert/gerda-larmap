@@ -3,8 +3,8 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 
-for d in gen/out/*; do
+for d in ../jobs/gen/out/*; do
     runid=`basename $d`
     [ ! -f out/gerda-larmap-$runid.root ] && \
-        qsub -N larmap-$runid create-larmap.qsub $runid `pwd`
+        qsub -N larmap-$runid create-larmap.qsub $runid
 done

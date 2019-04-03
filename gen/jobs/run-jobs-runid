@@ -13,21 +13,21 @@ else
     echo "INFO: using run ID $runid"
 fi
 
-[ ! -f ../gerda-sw-all.img ] \
-    && echo "ERROR: missing Singularity container ../gerda-sw-all.img" \
+[ ! -f ../../gerda-sw-all.img ] \
+    && echo "ERROR: missing Singularity container ../../gerda-sw-all.img" \
     && exit
 
 [ ! -f ./run-jobs-runid ] \
     && echo "ERROR: must cd where 'run-jobs' is before running!" \
     && exit
 
-mkdir -p log/$runid out/$runid
-echo "INFO: using ../gerda-sw-all.img container"
+mkdir -p out/$runid log/$runid
+echo "INFO: using ../../gerda-sw-all.img container"
 
 for i in `seq 1 $2`; do
     stamp=`date +%s%N | cut -b1-13`
     sed -e "s/\${OUTNAME}/out\/$runid\/phmap-$stamp.root/g" $1 > log/$runid/phmap-$stamp.mac
-    qsub -N mage-$runid-$stamp mage-runner.qsub log/$runid/phmap-$stamp.mac `pwd`
+    qsub -N mage-$runid-$stamp mage-runner.qsub log/$runid/phmap-$stamp.mac
 done
 
 echo "INFO: $2 jobs for run ID $runid successfully submitted to qsub"

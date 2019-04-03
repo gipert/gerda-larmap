@@ -1,8 +1,7 @@
 *.img
 *.root
 log
-gen/log
-gen/out
+out
 create-larmap
 larmap-doctor
 map-merger

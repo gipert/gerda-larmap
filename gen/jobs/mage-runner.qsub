@@ -3,13 +3,13 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 #
-# USAGE: qsub mage-runner.qsub <mage-macro-file> <working-dir>
+# USAGE: qsub mage-runner.qsub <mage-macro-file>
 #
 #$ -P short ### queue
 #$ -j y     ### have logoutput and erroroutput in the same file
+#$ -cwd
 #$ -o /dev/null
 #$ -e /dev/null
 
 LOGFILE=$(echo $1 | cut -f 1 -d '.').log
-cd $2
-singularity exec ../gerda-sw-all.img MaGe --no-colors $1 &> $LOGFILE
+singularity exec ../../gerda-sw-all.img MaGe --no-colors $1 &> $LOGFILE

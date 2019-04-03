@@ -8,13 +8,13 @@ Put a [gerda-sw-all](https://github.com/mppmu/gerda-sw-all) Singularity containe
 make
 
 # run MaGe simulations (with qsub)
-cd gen && ./run-all-jobs
+cd gerda-larmap/gen/jobs && ./run-all-jobs
 
 # create photon maps
-cd .. && ./run-all-jobs
+cd gerda-larmap/jobs && ./run-all-jobs
 
 # merge everything
-./map-merger out/*.root
+gerda-larmap/map-merger jobs/out/*.root
 ```
 
 ## GERDA Tomography
