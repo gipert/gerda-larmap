@@ -22,7 +22,7 @@ larmap-doctor : larmap-doctor.cc progressbar/ProgressBar.cc
 map-merger : map-merger.cc
 	c++ $(FLAGS) -o $@ $^
 
-map-smoother : map-smoother.cc
+map-smoother : map-smoother.cc progressbar/ProgressBar.cc
 	c++ $(FLAGS) -o $@ $^
 
 clean :
