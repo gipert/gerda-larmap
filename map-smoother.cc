@@ -104,9 +104,11 @@ int main(int argc, char** argv) {
     }
 
     filename.erase(std::find(filename.begin(), filename.end(), '.'), filename.end());
-    auto outname = filename + "-smoothed.root";
+    auto outname = filename + "-smoothed-w" + std::to_string(ws) + ".root";
     TFile fout(outname.c_str(), "RECREATE");
     h_sm.Write("LAr_prob_map");
+
+    std::cout << "INFO: " + outname + " created";
 
     return 0;
 }
