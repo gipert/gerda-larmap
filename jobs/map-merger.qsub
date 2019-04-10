@@ -8,8 +8,11 @@
 #$ -P short ### queue
 #$ -j y     ### have logoutput and erroroutput in the same file
 #$ -cwd
-##$ -o /dev/null
-##$ -e /dev/null
+#$ -o /dev/null
+#$ -e /dev/null
 
 mkdir -p out
-singularity exec ../gerda-sw-all_dev.img ../map-merger -o out/gerda-larmap-merged-$1.root "${@:2}"
+singularity exec ../gerda-sw-all.simg \
+    ../map-merger -o out/gerda-larmap-merged-$1.root "${@:2}" &> log/map-merger-$1.log
+singularity exec --hostname `hostname` /lfs/l1/gerda/pertoldi/containers/gerda-tgsend.simg \
+    gerda-notifier '`map-merger`: $1 job done.'
