@@ -102,6 +102,7 @@ int main(int argc, char** argv) {
             }
         }
     }
+    std::cout << std::endl;
 
     filename.erase(std::find(filename.begin(), filename.end(), '.'), filename.end());
     auto outname = filename + "-smoothed-w" + std::to_string(ws) + ".root";
