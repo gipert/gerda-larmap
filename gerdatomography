@@ -11,7 +11,7 @@ void dynamic_exec();
 float max_prob = 0;
 
 // array closeup
-bool array_closeup = true;
+bool array_closeup = false;
 float xmin = -15;
 float xmax = 15;
 float ymin = -17;
