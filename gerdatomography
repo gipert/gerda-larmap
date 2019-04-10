@@ -10,6 +10,15 @@ void dynamic_exec();
 
 float max_prob = 0;
 
+// array closeup
+bool array_closeup = true;
+float xmin = -15;
+float xmax = 15;
+float ymin = -17;
+float ymax = 17;
+float zmin = -35;
+float zmax = 15;
+
 void gerdatomography(int rebin = 2) {
 
     if (gROOT->GetVersionInt() < 60900) {
@@ -23,6 +32,10 @@ void gerdatomography(int rebin = 2) {
 
     TFile* tfile = new TFile(filename.c_str(), "read");
     auto LAr_prob_map = dynamic_cast<TH3D*>(tfile->Get("LAr_prob_map"));
+    if (!LAr_prob_map) {
+        std::cout << "ERROR: LAr_prob_map object not found!\n";
+        gSystem->Exit(0);
+    }
 
     std::cout << "INFO: preparing histogram...\n";
     // this is needed for a meaningful rebin...
@@ -41,6 +54,7 @@ void gerdatomography(int rebin = 2) {
         "gerda_tomography", "GERDA Tomography",
         1800, 1000
     );
+    canvas->ToggleEventStatus();
 
     // this should enable the "invert" drawing mode
     // if a shape is re-drawn then it should disappear
@@ -134,14 +148,12 @@ void dynamic_exec() {
     double u_xy[3], xx_xy[3];
 
     static TPoint rect1_xz[5]; // store vertices of the polyline (rectangle), initialsed 0 by default
-    // static TPoint rect2_xz[5]; // second rectangle when slice thickness > 1 bin thickness
     static TPoint rect1_xy[5];
-    // static TPoint rect2_xy[5];
 
-    Double_t uxmin = gPad->GetUxmin();
-    Double_t uxmax = gPad->GetUxmax();
-    Double_t uymin = gPad->GetUymin();
-    Double_t uymax = gPad->GetUymax();
+    double uxmin = gPad->GetUxmin();
+    double uxmax = gPad->GetUxmax();
+    double uymin = gPad->GetUymin();
+    double uymax = gPad->GetUymax();
 
     int pxmin = gPad->XtoAbsPixel(uxmin);
     int pxmax = gPad->XtoAbsPixel(uxmax);
@@ -167,13 +179,12 @@ void dynamic_exec() {
     if (!c_xz) return;
 
     // erase old polyline
-    if (rect1_xz[0].GetX()) gVirtualX->DrawPolyLine(5, rect1_xz);
-    // if (nbins > 1 and rect1_xz[0].GetX()) gVirtualX->DrawPolyLine(5,rect2_xz);
+    // if (rect1_xz[0].GetX()) gVirtualX->DrawPolyLine(5, rect1_xz);
 
     // compute polyline
     int first_xz = yaxis->GetFirst();
     int last_xz  = yaxis->GetLast();
-    int biny_xz = first_xz + int((last_xz-first_xz)*(py-pymin)/(pymax-pymin));
+    int biny_xz = first_xz + int((last_xz-first_xz)*(px-pxmin)/(pxmax-pxmin));
     int biny2_xz = TMath::Min(biny_xz+nbins-1, yaxis->GetNbins());
     yaxis->SetRange(biny_xz, biny2_xz);
     xx_xz[0] = xaxis->GetXmin();
@@ -197,30 +208,6 @@ void dynamic_exec() {
     rect1_xz[3].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
     rect1_xz[3].SetY(pymin + int((u_xz[1]-uymin)*cy));
 
-    // if (nbins > 1) {
-    //     xx_xz[0] = xaxis->GetXmin();
-    //     xx_xz[2] = zaxis->GetXmax();
-    //     xx_xz[1] = yaxis->GetBinCenter(biny_xz+nbins-1);
-    //     view->WCtoNDC(xx_xz,u_xz);
-    //     rect2_xz[0].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
-    //     rect2_xz[0].SetY(pymin + int((u_xz[1]-uymin)*cy));
-    //     rect2_xz[4].SetX(rect2_xz[0].GetX());
-    //     rect2_xz[4].SetY(rect2_xz[0].GetY());
-    //     xx_xz[0] = xaxis->GetXmax();
-    //     view->WCtoNDC(xx_xz,u_xz);
-    //     rect2_xz[1].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
-    //     rect2_xz[1].SetY(pymin + int((u_xz[1]-uymin)*cy));
-    //     xx_xz[2] = zaxis->GetXmin();
-    //     view->WCtoNDC(xx_xz,u_xz);
-    //     rect2_xz[2].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
-    //     rect2_xz[2].SetY(pymin + int((u_xz[1]-uymin)*cy));
-    //     xx_xz[0] = xaxis->GetXmin();
-    //     view->WCtoNDC(xx_xz,u_xz);
-    //     rect2_xz[3].SetX(pxmin + int((u_xz[0]-uxmin)*cx));
-    //     rect2_xz[3].SetY(pymin + int((u_xz[1]-uymin)*cy));
-    //     gVirtualX->DrawPolyLine(5,rect2_xz);
-    // }
-
     ///////////////////
     // xy projection //
     ///////////////////
@@ -229,8 +216,7 @@ void dynamic_exec() {
     if (!c_xy) return;
 
     // erase old polyline
-    if (rect1_xy[0].GetX()) gVirtualX->DrawPolyLine(5, rect1_xy);
-    // if (nbins > 1 && rect2_xy[0].GetX()) gVirtualX->DrawPolyLine(5,rect2_xy);
+    // if (rect1_xy[0].GetX()) gVirtualX->DrawPolyLine(5, rect1_xy);
 
     // compute polyline
     int first_xy = zaxis->GetFirst();
@@ -259,30 +245,6 @@ void dynamic_exec() {
     rect1_xy[3].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
     rect1_xy[3].SetY(pymin + int((u_xy[1]-uymin)*cy));
 
-    // if (nbins > 1) {
-    //     xx_xy[0] = xaxis->GetXmin();
-    //     xx_xy[1] = yaxis->GetXmax();
-    //     xx_xy[2] = zaxis->GetBinCenter(binz_xy+nbins-1);
-    //     view->WCtoNDC(xx_xy,u_xy);
-    //     rect2_xy[0].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
-    //     rect2_xy[0].SetY(pymin + int((u_xy[1]-uymin)*cy));
-    //     rect2_xy[4].SetX(rect2_xy[0].GetX());
-    //     rect2_xy[4].SetY(rect2_xy[0].GetY());
-    //     xx_xy[0] = xaxis->GetXmax();
-    //     view->WCtoNDC(xx_xy,u_xy);
-    //     rect2_xy[1].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
-    //     rect2_xy[1].SetY(pymin + int((u_xy[1]-uymin)*cy));
-    //     xx_xy[1] = yaxis->GetXmin();
-    //     view->WCtoNDC(xx_xy,u_xy);
-    //     rect2_xy[2].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
-    //     rect2_xy[2].SetY(pymin + int((u_xy[1]-uymin)*cy));
-    //     xx_xy[0] = xaxis->GetXmin();
-    //     view->WCtoNDC(xx_xy,u_xy);
-    //     rect2_xy[3].SetX(pxmin + int((u_xy[0]-uxmin)*cx));
-    //     rect2_xy[3].SetY(pymin + int((u_xy[1]-uymin)*cy));
-    //     gVirtualX->DrawPolyLine(5, rect2_xy);
-    // }
-
     c_xz->Clear();
     c_xz->cd();
 
@@ -300,18 +262,10 @@ void dynamic_exec() {
     yaxis->SetRange(first_xz, last_xz);
 
     if (hp_xz) {
-        // if (nbins == 1) {
-            hp_xz->SetTitle(
-                TString::Format("XZ slice - bin %d, y #in [%.1f, %.f]",
-                    biny_xz, yaxis->GetBinLowEdge(biny_xz), yaxis->GetBinUpEdge(biny_xz))
-            );
-        // }
-        // else {
-        //     hp_xz->SetTitle(
-        //         TString::Format("Projection ZX, biny=[%d,%d] [y=%.1f..%.1f]",
-        //             biny_xz, biny2_xz, yaxis->GetBinLowEdge(biny_xz), yaxis->GetBinUpEdge(biny2_xz))
-        //     );
-        // }
+        hp_xz->SetTitle(
+            TString::Format("XZ slice - bin %d, y #in [%.1f, %.f]",
+                biny_xz, yaxis->GetBinLowEdge(biny_xz), yaxis->GetBinUpEdge(biny_xz))
+        );
         hp_xz->SetTickLength(0.01, "X");
         hp_xz->SetTickLength(0.02, "Y");
         hp_xz->SetTitleOffset(1.30, "Y");
@@ -321,7 +275,6 @@ void dynamic_exec() {
         hp_xz->SetMaximum(max_prob);
         hp_xz->Draw("colz");
     }
-    c_xy->Update();
 
     c_xy->Clear();
     c_xy->cd();
@@ -339,17 +292,10 @@ void dynamic_exec() {
     zaxis->SetRange(first_xy, last_xy);
 
     if (hp_xy) {
-        // if (nbins == 1) {
-            hp_xy->SetTitle(
-                TString::Format("XY slice - bin %d, z #in [%.1f, %.f]",
-                    binz_xy, zaxis->GetBinLowEdge(binz_xy), zaxis->GetBinUpEdge(binz_xy))
-            );
-        // }
-        // else { hp_xy->SetTitle(
-        //     TString::Format("XY projection, binz=[%d,%d] [z=%.1f..%.1f]",
-        //         binz_xy, binz2_xy, zaxis->GetBinLowEdge(binz_xy), zaxis->GetBinUpEdge(binz2_xy))
-        //     );
-        // }
+        hp_xy->SetTitle(
+            TString::Format("XY slice - bin %d, z #in [%.1f, %.f]",
+                binz_xy, zaxis->GetBinLowEdge(binz_xy), zaxis->GetBinUpEdge(binz_xy))
+        );
         hp_xy->SetTickLength(0.01, "X");
         hp_xy->SetTickLength(0.02, "Y");
         hp_xy->SetTitleOffset(1.30, "Y");
@@ -359,13 +305,21 @@ void dynamic_exec() {
         hp_xy->SetMaximum(max_prob);
         hp_xy->Draw("colz");
     }
+
+    if (array_closeup) {
+        hp_xz->GetXaxis()->SetRangeUser(xmin, xmax);
+        hp_xz->GetYaxis()->SetRangeUser(zmin, zmax);
+        hp_xy->GetXaxis()->SetRangeUser(xmin, xmax);
+        hp_xy->GetYaxis()->SetRangeUser(ymin, ymax);
+    }
+    c_xy->Update();
     c_xz->Update();
 
     main_pad->cd();
 
     // draw the polylines
-    gVirtualX->DrawPolyLine(5, rect1_xy);
-    gVirtualX->DrawPolyLine(5, rect1_xz);
+    // gVirtualX->DrawPolyLine(5, rect1_xy);
+    // gVirtualX->DrawPolyLine(5, rect1_xz);
 }
 
 const std::string OpenFileDialog() {
