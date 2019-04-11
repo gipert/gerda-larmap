@@ -11,8 +11,6 @@
 #$ -o /dev/null
 #$ -e /dev/null
 
-mkdir -p out
+mkdir -p merged/log
 singularity exec ../gerda-sw-all.simg \
-    ../map-merger -o out/gerda-larmap-merged-$1.root "${@:2}" &> log/map-merger-$1.log
-singularity exec --hostname `hostname` /lfs/l1/gerda/pertoldi/containers/gerda-tgsend.simg \
-    gerda-notifier '`map-merger`: $1 job done.'
+    ../map-merger -o merged/gerda-larmap-merged-$1.root "${@:2}" &> merged/log/map-merger-$1.log
