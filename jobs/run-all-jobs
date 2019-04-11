@@ -19,10 +19,10 @@ echo "INFO: using $manager cluster manager"
 
 mkdir -p log out
 
-for d in ../jobs/gen/out/*; do
+for d in ../gen/jobs/out/*; do
     runid=`basename $d`
     if [ ! -f out/gerda-larmap-$runid.root ]; then
-        [ "$manager" == "qsub"   ] qsub -N larmap-$runid create-larmap.qsub $runid
-        [ "$manager" == "condor" ] condor_submit -batch-name larmap-$runid WORKDIR=`pwd` RUNID=$runid create-larmap.jdl
+        [ "$manager" == "qsub"   ] && qsub -N larmap-$runid create-larmap.qsub $runid
+        [ "$manager" == "condor" ] && condor_submit -batch-name larmap-$runid WORKDIR=`pwd` RUNID=$runid create-larmap.jdl
     fi
 done
