@@ -52,4 +52,4 @@
 /MG/generator/Sampling/volume/offsetCenterXPos    0 mm
 /MG/generator/Sampling/volume/offsetCenterZPos    -11.5 cm
 
-/run/beamOn                                       25000000
+/run/beamOn                                       20000000
