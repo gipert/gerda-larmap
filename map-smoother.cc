@@ -52,8 +52,8 @@ int main(int argc, char** argv) {
     TH3D h_sm(
         "LAr_prob_map_smooth", h->GetTitle(),
         h->GetNbinsX(), h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax(),
-        h->GetNbinsY(), h->GetYaxis()->GetXmin(), h->GetXaxis()->GetXmax(),
-        h->GetNbinsZ(), h->GetZaxis()->GetXmax(), h->GetXaxis()->GetXmax()
+        h->GetNbinsY(), h->GetYaxis()->GetXmin(), h->GetYaxis()->GetXmax(),
+        h->GetNbinsZ(), h->GetZaxis()->GetXmin(), h->GetZaxis()->GetXmax()
     );
 
     float _sum;
@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
 
     std::cout << "INFO: using smoothing window size = " << ws << std::endl;
 
-    ProgressBar bar(nb_x*nb_y*nb_z);
+    ProgressBar bar((nb_x-1)*(nb_y-1)*(nb_z-1));
     std::cout << "INFO: ";
 
     // loop over the histogram cells (no overflow)
@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
     TFile fout(outname.c_str(), "RECREATE");
     h_sm.Write("LAr_prob_map");
 
-    std::cout << "INFO: " + outname + " created";
+    std::cout << "INFO: " + outname + " created" << std::endl;
 
     return 0;
 }

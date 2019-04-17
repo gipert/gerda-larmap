@@ -19,7 +19,7 @@ float ymax = 17;
 float zmin = -35;
 float zmax = 15;
 
-void gerdatomography(int rebin = 2) {
+void gerdatomography(int rebin = 1) {
 
     if (gROOT->GetVersionInt() < 60900) {
         std::cerr << "ERROR: this program works properly with ROOT >= 6.09\n";
@@ -33,8 +33,15 @@ void gerdatomography(int rebin = 2) {
     TFile* tfile = new TFile(filename.c_str(), "read");
     auto LAr_prob_map = dynamic_cast<TH3D*>(tfile->Get("LAr_prob_map"));
     if (!LAr_prob_map) {
-        std::cout << "ERROR: LAr_prob_map object not found!\n";
-        gSystem->Exit(0);
+        std::cout << "ERROR: LAr_prob_map object not found!\n"
+                  << "File content:";
+        tfile->ls();
+        while (!LAr_prob_map) {
+            std::string name;
+            std::cout << "select another TH3D object: ";
+            std::cin >> name;
+            LAr_prob_map = dynamic_cast<TH3D*>(tfile->Get(name.c_str()));
+        }
     }
 
     std::cout << "INFO: preparing histogram...\n";
