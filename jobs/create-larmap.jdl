@@ -7,7 +7,7 @@ universe = docker
 docker_image = 10.64.28.50:5000/gerda-sw-all:gerda-optical
 
 executable = /usr/bin/time
-arguments = -v ../create-larmap ../settings \
+arguments = -v ../bin/create-larmap ../settings \
             "../gen/jobs/out/$(RUNID)/phmap-*.root" \
             out/gerda-larmap-$(RUNID).root
 

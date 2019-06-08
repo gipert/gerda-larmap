@@ -28,11 +28,11 @@ else
 fi
 
 if [ "$manager" == "qsub" ]; then
-    [ ! -f ../../gerda-sw-all.simg ] \
-        && echo "ERROR: missing Singularity container ../../gerda-sw-all.simg" \
+    [ ! -f ../../bin/gerda-sw-all.simg ] \
+        && echo "ERROR: missing Singularity container ../../bin/gerda-sw-all.simg" \
         && exit
 
-    echo "INFO: using ../../gerda-sw-all.img container"
+    echo "INFO: using ../../bin/gerda-sw-all.img container"
 fi
 
 mkdir -p out/$runid log/$runid

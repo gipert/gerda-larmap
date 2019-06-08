@@ -10,7 +10,7 @@
 
 // ROOT
 #include "TChain.h"
-#include "TH3D.h"
+#include "TH3F.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TTreeReader.h"
@@ -25,7 +25,7 @@
 
 #include "ProgressBar.h"
 
-bool divide_maps(TH3D *h1, const TH3D *h2);
+bool divide_maps(TH3* out, const TH3* h1, const TH3* h2);
 
 int main(int argc, char** argv) {
 
@@ -43,15 +43,22 @@ int main(int argc, char** argv) {
 
     // initialize probability map
     auto& s = config;
-    TH3D vertex_map(
+    TH3I vertex_map(
         "LAr_vertex_map", "LAr_vertex_map",
         s["bins"][0].As<int>(), s["range-cm"][0][0].As<double>(), s["range-cm"][0][1].As<double>(),
         s["bins"][1].As<int>(), s["range-cm"][1][0].As<double>(), s["range-cm"][1][1].As<double>(),
         s["bins"][2].As<int>(), s["range-cm"][2][0].As<double>(), s["range-cm"][2][1].As<double>()
     );
 
-    TH3D vertex_hits_map(
+    TH3I vertex_hits_map(
         "LAr_vertex_hits_map", "LAr_vertex_hits_map",
+        s["bins"][0].As<int>(), s["range-cm"][0][0].As<double>(), s["range-cm"][0][1].As<double>(),
+        s["bins"][1].As<int>(), s["range-cm"][1][0].As<double>(), s["range-cm"][1][1].As<double>(),
+        s["bins"][2].As<int>(), s["range-cm"][2][0].As<double>(), s["range-cm"][2][1].As<double>()
+    );
+
+    TH3F prob_map(
+        "LAr_prob_map", "LAr_prob_map",
         s["bins"][0].As<int>(), s["range-cm"][0][0].As<double>(), s["range-cm"][0][1].As<double>(),
         s["bins"][1].As<int>(), s["range-cm"][1][0].As<double>(), s["range-cm"][1][1].As<double>(),
         s["bins"][2].As<int>(), s["range-cm"][2][0].As<double>(), s["range-cm"][2][1].As<double>()
@@ -89,15 +96,14 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
 
     // perform the division
-    auto prob_map = dynamic_cast<TH3D*>(vertex_hits_map.Clone("LAr_prob_map"));
-    divide_maps(prob_map, &vertex_map);
+    divide_maps(&prob_map, &vertex_hits_map, &vertex_map);
 
     // write to disk
     auto filename = argc > 3 ? argv[3] : config["output"].Or("gerda-larmap.root").As<std::string>();
     TFile fout(filename.c_str(), "recreate");
     vertex_map.Write();
     vertex_hits_map.Write();
-    prob_map->Write();
+    prob_map.Write();
 
     std::cout << "INFO: file '" + filename + "' created\n";
 
@@ -105,9 +111,9 @@ int main(int argc, char** argv) {
 }
 
 // NB: does not check for input consistency
-bool divide_maps(TH3D *h1, const TH3D *h2) {
+bool divide_maps(TH3* out, const TH3* h1, const TH3* h2) {
 
-    if (!h1 or !h2) {
+    if (!out or !h1 or !h2) {
         std::cerr << "ERROR: passing a nullptr to divide_maps.";
         return false;
     }
@@ -117,14 +123,14 @@ bool divide_maps(TH3D *h1, const TH3D *h2) {
         double c2 = h2->GetBinContent(i);
 
         if (c2 == 0) {
-            h1->SetBinContent(i, -1); // -1 means zero statistics
-            h1->SetBinError(i, -1);
+            out->SetBinContent(i, -1); // -1 means zero statistics
+            out->SetBinError(i, -1);
         }
         else {
-            h1->SetBinContent(i, c1/c2);
+            out->SetBinContent(i, c1/c2);
             // compute uncertainty according to Bernoulli statistics
             // (leads to non-sense values when c1 = 0 or c1 = c2)
-            h1->SetBinError(i, TMath::Sqrt((c1/c2)*(1-c1/c2)/c2));
+            out->SetBinError(i, TMath::Sqrt((c1/c2)*(1-c1/c2)/c2));
         }
     }
 

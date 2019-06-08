@@ -11,7 +11,7 @@
 
 // ROOT
 #include "TFile.h"
-#include "TH3D.h"
+#include "TH3.h"
 
 int main(int argc, char** argv) {
 
@@ -20,8 +20,8 @@ int main(int argc, char** argv) {
     auto filename = argc > 1 ? argv[1] : "gerda-larmap-merged.root";
     std::cout << "INFO: visiting " << filename << "...\n";
     TFile f(filename, "read");
-    auto h = dynamic_cast<TH3D*>(f.Get("LAr_prob_map"));
-    auto v = dynamic_cast<TH3D*>(f.Get("LAr_vertex_map"));
+    auto h = dynamic_cast<TH3*>(f.Get("LAr_prob_map"));
+    auto v = dynamic_cast<TH3*>(f.Get("LAr_vertex_map"));
 
     int missing_v, missing, big_error, non_phys, p_equal_one, p_equal_zero;
     missing_v = missing = big_error = non_phys = p_equal_one = p_equal_zero = 0;

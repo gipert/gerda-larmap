@@ -12,5 +12,5 @@
 #$ -e /dev/null
 
 LOGFILE=$(echo $1 | cut -f 1 -d '.').log
-singularity exec ../../gerda-sw-all.simg \
+singularity exec ../../bin/gerda-sw-all.simg \
     /usr/bin/time -v MaGe --no-colors $1 &> $LOGFILE

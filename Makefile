@@ -3,6 +3,7 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 #
+CXX    = c++
 FLAGS  = -std=c++11 -g -O3 -Wall
 FLAGS += $$(root-config --libs --cflags) -lTreePlayer
 FLAGS += $$(gerda-ada-config --libs --cflags)
@@ -11,19 +12,15 @@ FLAGS += $$(mgdo-config --libs --cflags)
 FLAGS += $$(databricxx-config --libs --cflags)
 FLAGS += -Iprogressbar
 
-all : create-larmap larmap-doctor map-merger map-smoother
+EXE = bin/create-larmap bin/larmap-doctor bin/map-merger bin/map-smoother
 
-create-larmap : create-larmap.cc progressbar/ProgressBar.cc
-	c++ $(FLAGS) -o $@ $^
+all : init $(EXE)
 
-larmap-doctor : larmap-doctor.cc progressbar/ProgressBar.cc
-	c++ $(FLAGS) -o $@ $^
+init :
+	@mkdir -p bin
 
-map-merger : map-merger.cc
-	c++ $(FLAGS) -o $@ $^
-
-map-smoother : map-smoother.cc progressbar/ProgressBar.cc
-	c++ $(FLAGS) -o $@ $^
+bin/% : %.cc progressbar/ProgressBar.cc
+	$(CXX) $(FLAGS) -o $@ $^
 
 clean :
-	-rm create-larmap larmap-doctor map-merger map-smoother
+	-rm $(EXE)

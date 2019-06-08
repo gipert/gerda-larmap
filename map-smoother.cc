@@ -14,7 +14,7 @@
 
 // ROOT
 #include "TFile.h"
-#include "TH3D.h"
+#include "TH3F.h"
 
 #include "ProgressBar.h"
 
@@ -42,14 +42,14 @@ int main(int argc, char** argv) {
     auto filename = args.size() >= 1 ? args[0] : "gerda-larmap-merged.root";
     std::cout << "INFO: smoothing " << filename << "...\n";
     TFile f(filename.c_str(), "read");
-    auto h = dynamic_cast<TH3D*>(f.Get("LAr_prob_map"));
+    auto h = dynamic_cast<TH3*>(f.Get("LAr_prob_map"));
     if (!h) {
         std::cout << "ERROR: LAr_prob_map object not found\n";
         return 1;
     }
 
     // save some time by copying only the structure
-    TH3D h_sm(
+    TH3F h_sm(
         "LAr_prob_map_smooth", h->GetTitle(),
         h->GetNbinsX(), h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax(),
         h->GetNbinsY(), h->GetYaxis()->GetXmin(), h->GetYaxis()->GetXmax(),

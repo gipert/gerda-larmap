@@ -13,10 +13,10 @@
 
 // ROOT
 #include "TFile.h"
-#include "TH3D.h"
+#include "TH3.h"
 #include "TMath.h"
 
-bool divide_maps(TH3D *h1, const TH3D *h2);
+bool divide_maps(TH3* out, const TH3* h1, const TH3* h2);
 
 int main(int argc, char** argv) {
 
@@ -62,27 +62,34 @@ int main(int argc, char** argv) {
     std::cout << "INFO: adding everything together...\n";
 
     TFile rf(args[0].c_str(), "read");
-    auto vertices      = dynamic_cast<TH3D*>(rf.Get("LAr_vertex_map"));
-    auto vertices_hits = dynamic_cast<TH3D*>(rf.Get("LAr_vertex_hits_map"));
+    auto vertices      = dynamic_cast<TH3*>(rf.Get("LAr_vertex_map"));
+    auto vertices_hits = dynamic_cast<TH3*>(rf.Get("LAr_vertex_hits_map"));
 
     for (size_t i = 1; i < args.size(); ++i) {
         std::cout << "\rINFO: Processing file " << args[i] << "..." << std::flush;
         TFile _rf(args[i].c_str(), "read");
-        vertices->Add(dynamic_cast<TH3D*>(_rf.Get("LAr_vertex_map")));
-        vertices_hits->Add(dynamic_cast<TH3D*>(_rf.Get("LAr_vertex_hits_map")));
+        vertices->Add(dynamic_cast<TH3*>(_rf.Get("LAr_vertex_map")));
+        vertices_hits->Add(dynamic_cast<TH3*>(_rf.Get("LAr_vertex_hits_map")));
     }
     std::cout << std::endl;
 
     std::cout << "INFO: dividing...\n";
-    auto prob_map = dynamic_cast<TH3D*>(vertices_hits->Clone("LAr_prob_map"));
-    prob_map->SetTitle("GERDA LAr probability map");
-    divide_maps(prob_map, vertices);
+    // save some time by copying only the structure
+    auto& h = vertices_hits;
+    TH3F prob_map(
+        "LAr_prob_map_smooth", h->GetTitle(),
+        h->GetNbinsX(), h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax(),
+        h->GetNbinsY(), h->GetYaxis()->GetXmin(), h->GetYaxis()->GetXmax(),
+        h->GetNbinsZ(), h->GetZaxis()->GetXmin(), h->GetZaxis()->GetXmax()
+    );
+
+    divide_maps(&prob_map, vertices_hits, vertices);
 
     TFile fout(outfile.c_str(), "recreate");
 
     vertices->Write();
     vertices_hits->Write();
-    prob_map->Write();
+    prob_map.Write();
 
     std::cout << "INFO: " << outfile << " created.\n";
 
@@ -90,9 +97,9 @@ int main(int argc, char** argv) {
 }
 
 // NB: does not check for input consistency
-bool divide_maps(TH3D *h1, const TH3D *h2) {
+bool divide_maps(TH3* out, const TH3* h1, const TH3* h2) {
 
-    if (!h1 or !h2) {
+    if (!out or !h1 or !h2) {
         std::cerr << "ERROR: passing a nullptr to divide_maps.";
         return false;
     }
@@ -102,14 +109,14 @@ bool divide_maps(TH3D *h1, const TH3D *h2) {
         double c2 = h2->GetBinContent(i);
 
         if (c2 <= 0) {
-            h1->SetBinContent(i, -1); // -1 means zero statistics
-            h1->SetBinError(i, -1);
+            out->SetBinContent(i, -1); // -1 means zero statistics
+            out->SetBinError(i, -1);
         }
         else {
-            h1->SetBinContent(i, c1/c2);
+            out->SetBinContent(i, c1/c2);
             // compute uncertainty according to Bernoulli statistics
             // (leads to non-sense values when c1 = 0 or c1 = c2)
-            h1->SetBinError(i, TMath::Sqrt((c1/c2)*(1-c1/c2)/c2));
+            out->SetBinError(i, TMath::Sqrt((c1/c2)*(1-c1/c2)/c2));
         }
     }
 
