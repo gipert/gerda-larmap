@@ -1,0 +1,55 @@
+# Author: Luigi Pertoldi - pertoldi@pd.infn.it
+# Created: Sun 24 Mar 2019
+
+/MG/manager/mglog                                 routine
+/MG/manager/seedWithDevRandom
+
+/MG/processes/realm                               BBdecay
+/MG/processes/lowenergy                           true
+/MG/processes/useNoHadPhysics                     true
+/MG/processes/optical                             true
+
+/MG/geometry/detector                             GerdaArray
+/MG/geometry/database                             false
+/MG/geometry/lock/type                            PhaseII_DN500
+/MG/geometry/detector/geometryfile                geometry.json
+/MG/geometry/detector/matrixfile                  matrix-PhaseII-dec15.json
+
+/MG/geometry/cherenkov                            -1
+/MG/geometry/general/constructMiniShroud          true
+/MG/geometry/general/constructLArInstrumentation  true
+
+/MG/materials/LAr/XUVAbsLength                    55 cm
+/MG/materials/LAr/PhotonYieldPerMeV               28120
+/MG/materials/ScaleMetalReflectivity              1.0
+
+/MG/geometry/LArInst/SetFiberCoverage             0.50
+/MG/geometry/LArInst/SegmentedFiberShroudRotation -141.0 deg
+
+/MG/eventaction/reportingfrequency                5000
+/MG/eventaction/rootschema                        GerdaInstrumentedArray
+/MG/eventaction/rootfilename                      ${OUTNAME}
+
+/MG/output/reduceHitInfo1                         true
+/MG/output/LArInst/alwaysTrackPhotons             true
+
+/run/initialize
+
+/MG/generator/confine                             volume
+/MG/generator/volume                              CryoLiquidPhysical
+
+/MG/generator/select                              SPS
+/gps/particle                                     opticalphoton
+/gps/ene/type                                     Gauss
+/gps/ene/mono                                     9.68 eV # 128nm (VUV) LAr scintillation
+/gps/ene/sigma                                    0.22 eV # gaussian width
+/gps/ang/type                                     iso
+/gps/polarization                                 1 1 1
+
+/MG/generator/Sampling/volume/name                  Cylinder
+/MG/generator/Sampling/volume/outerCylinderRadius   38.5 cm
+/MG/generator/Sampling/volume/cylinderHeight        2 mm
+/MG/generator/Sampling/volume/offsetCenterXPos      0 mm
+/MG/generator/Sampling/volume/offsetCenterZPos      60 cm
+
+/run/beamOn                                       20000000

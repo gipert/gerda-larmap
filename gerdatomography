@@ -31,16 +31,16 @@ void gerdatomography(int rebin = 1) {
     if (filename.empty()) { gSystem->Exit(0); }
 
     TFile* tfile = new TFile(filename.c_str(), "read");
-    auto LAr_prob_map = dynamic_cast<TH3D*>(tfile->Get("LAr_prob_map"));
+    auto LAr_prob_map = dynamic_cast<TH3*>(tfile->Get("LAr_prob_map"));
     if (!LAr_prob_map) {
         std::cout << "ERROR: LAr_prob_map object not found!\n"
-                  << "File content:";
+                  << "File content:\n";
         tfile->ls();
         while (!LAr_prob_map) {
             std::string name;
-            std::cout << "select another TH3D object: ";
+            std::cout << "select another TH3 object: ";
             std::cin >> name;
-            LAr_prob_map = dynamic_cast<TH3D*>(tfile->Get(name.c_str()));
+            LAr_prob_map = dynamic_cast<TH3*>(tfile->Get(name.c_str()));
         }
     }
 
