@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
     // save some time by copying only the structure
     auto& h = vertices_hits;
     TH3F prob_map(
-        "LAr_prob_map_smooth", h->GetTitle(),
+        "LAr_prob_map", h->GetTitle(),
         h->GetNbinsX(), h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax(),
         h->GetNbinsY(), h->GetYaxis()->GetXmin(), h->GetYaxis()->GetXmax(),
         h->GetNbinsZ(), h->GetZaxis()->GetXmin(), h->GetZaxis()->GetXmax()
