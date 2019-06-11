@@ -6,11 +6,11 @@
 # generation rate depends on the CPU, on MPIK I've seen 30-60 sec / 1E5 ev
 # with 2.5E7 events macros this means 1.25-2.50 hours per job
 
-for i in `seq 0 9`; do
+for i in `seq 0 1`; do
     [ ! -d out/sliced-longitudinal-00$i  ] && ./run-jobs-runid ../sliced/lar-vuv-longitudinal.mac.template 10 sliced-longitudinal-00$i
-    [ ! -d out/sliced-transversal-1-00$i ] && ./run-jobs-runid ../sliced/lar-vuv-transversal-1.mac.template 10 sliced-transversal-1-00$i
-    [ ! -d out/sliced-transversal-2-00$i ] && ./run-jobs-runid ../sliced/lar-vuv-transversal-2.mac.template 10 sliced-transversal-2-00$i
-    [ ! -d out/sliced-transversal-3-00$i ] && ./run-jobs-runid ../sliced/lar-vuv-transversal-3.mac.template 10 sliced-transversal-3-00$i
-    [ ! -d out/sliced-transversal-4-00$i ] && ./run-jobs-runid ../sliced/lar-vuv-transversal-4.mac.template 10 sliced-transversal-4-00$i
-    [ ! -d out/sliced-transversal-5-00$i ] && ./run-jobs-runid ../sliced/lar-vuv-transversal-5.mac.template 10 sliced-transversal-5-00$i
+    [ ! -d out/sliced-transversal1-00$i ] && ./run-jobs-runid ../sliced/lar-vuv-transversal1.mac.template 10 sliced-transversal1-00$i
+    [ ! -d out/sliced-transversal2-00$i ] && ./run-jobs-runid ../sliced/lar-vuv-transversal2.mac.template 10 sliced-transversal2-00$i
+    [ ! -d out/sliced-transversal3-00$i ] && ./run-jobs-runid ../sliced/lar-vuv-transversal3.mac.template 10 sliced-transversal3-00$i
+    [ ! -d out/sliced-transversal4-00$i ] && ./run-jobs-runid ../sliced/lar-vuv-transversal4.mac.template 10 sliced-transversal4-00$i
+    [ ! -d out/sliced-transversal5-00$i ] && ./run-jobs-runid ../sliced/lar-vuv-transversal5.mac.template 10 sliced-transversal5-00$i
 done

@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 
     std::string configdir = "./";
     if (configfile.find('/') != std::string::npos) {
-        configdir = configfile.substr(0, configfile.find_last_of('/'));
+        configdir = configfile.substr(0, configfile.find_last_of('/')+1);
     }
 
     // open MaGe files
