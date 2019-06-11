@@ -12,6 +12,6 @@
 #$ -e /dev/null
 
 singularity exec ../bin/gerda-sw-all.simg \
-    ../bin/create-larmap ../settings \
+    ../bin/create-larmap ../settings/prob-map-settings.json \
                      "../gen/jobs/out/$1/phmap-*.root" \
                      out/gerda-larmap-$1.root &> log/create-larmap-$1.log

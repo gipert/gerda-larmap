@@ -30,10 +30,15 @@ bool divide_maps(TH3* out, const TH3* h1, const TH3* h2);
 int main(int argc, char** argv) {
 
     // load JSON settings
-    auto configdir = argc > 1 ? std::string(argv[1]) : "../settings";
+    auto configfile = argc > 1 ? std::string(argv[1]) : "prob-map-settings.json";
     katrin::KTree config;
-    try { katrin::KTreeFile(configdir + "/prob-map-settings.json").Read(config); }
+    try { katrin::KTreeFile(configfile).Read(config); }
     catch (katrin::KException &e) { std::cerr << e.what() << std::endl; }
+
+    std::string configdir = "./";
+    if (configfile.find('/') != std::string::npos) {
+        configdir = configfile.substr(0, configfile.find_last_of('/'));
+    }
 
     // open MaGe files
     auto filelist = argc > 2 ? argv[2] : config["files"].As<std::string>();
@@ -66,8 +71,8 @@ int main(int argc, char** argv) {
 
     // set up the Tier4izer
     gada::T4SimConfig simConfig;
-    simConfig.LoadMapping(configdir + "/mapping-spmMerged.json");
-    simConfig.LoadLArSettings(configdir + "/lar-settings-55cm_0.50cov.json");
+    simConfig.LoadMapping(configdir + config["mapping"].As<std::string>());
+    simConfig.LoadLArSettings(configdir + config["lar-settings"].As<std::string>());
 
     gada::T4SimHandler simHandler(&chain, &simConfig);
     simHandler.SetBranchAddresses();
