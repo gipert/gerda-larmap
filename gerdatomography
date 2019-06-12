@@ -1,39 +1,108 @@
-//usr/bin/env root -l ${0}\(${1}\); exit $?
-/* gerda_tomography.C
+//usr/bin/env root -l ${0}\(\""$*"\"\); exit $?
+/* gerdatomography
  *
  * Author: Luigi Pertoldi - pertoldi@pd.infn.it
  * Created: Sun 24 Mar 2019
  */
 
+#include "getopt.h"
+
 const std::string OpenFileDialog();
 void dynamic_exec();
+void do_visualize(TH3* LAr_prob_map, int rebin, bool array_closeup);
 
-float max_prob = 0;
+void usage() {
+    std::cerr << "\n"
+              << "USAGE: gerdatomography [options] [ROOTfile:objname]\n"
+              << "\n"
+              << "options:\n"
+              << "  --help|-h        : print this help message and exit\n"
+              << "  --rebin|-r <val> : set rebin factor\n"
+              << "  --array|-a       : zoom into the array region\n"
+              << "\n";
+}
 
-// array closeup
-bool array_closeup = false;
-float xmin = -15;
-float xmax = 15;
-float ymin = -17;
-float ymax = 17;
-float zmin = -35;
-float zmax = 15;
-
-void gerdatomography(int rebin = 1) {
+void gerdatomography(std::string args = "") {
 
     if (gROOT->GetVersionInt() < 60900) {
         std::cerr << "ERROR: this program works properly with ROOT >= 6.09\n";
         gSystem->Exit(1);
     }
 
-    // ask for input file
-    std::string filename = OpenFileDialog();
-    if (filename.empty()) { gSystem->Exit(0); }
+    args = "gerdatomography " + args;
+
+    int argc = 0;
+    char** argv = new char*[50];
+
+    std::istringstream iss(args);
+    std::string word;
+    while (iss >> word) {
+        char* tmp = new char[50];
+        strcpy(tmp, word.c_str());
+        argv[argc] = tmp;
+        argc++;
+    }
+
+    const char* const short_opts = "r:ha";
+    const option long_opts[] = {
+        { "rebin",  required_argument, nullptr, 'r' },
+        { "help",   no_argument,       nullptr, 'h' },
+        { "array",  no_argument,       nullptr, 'a' },
+        { nullptr,  no_argument,       nullptr, 0   }
+    };
+
+    // defaults
+    int rebin = 1;
+    bool array_closeup = false;
+
+    int opt = 0;
+    while ((opt = getopt_long(argc, argv, short_opts, long_opts, nullptr)) != -1) {
+        switch (opt) {
+            case 'r':
+                rebin = strtol(optarg, (char **)NULL, 10);
+                break;
+            case 'a':
+                array_closeup = true;
+                break;
+            case 'h': // -h or --help
+            case '?': // Unrecognized option
+            default:
+                usage();
+                gSystem->Exit(1);
+        }
+    }
+
+    // extra arguments
+    std::vector<std::string> extra_args;
+    for(; optind < argc; optind++){
+        extra_args.emplace_back(argv[optind]);
+    }
+
+    TH3* LAr_prob_map;
+    std::string filename = "";
+    std::string objname = "LAr_prob_map";
+
+    if (!extra_args.empty()) {
+        if (extra_args[0].find(':') == std::string::npos) {
+            filename = extra_args[0];
+        }
+        else {
+            filename = extra_args[0].substr(0, extra_args[0].find(':'));
+            objname = extra_args[0].substr(extra_args[0].find(':')+1, extra_args[0].size());
+        }
+    }
+    else {
+        // ask for input file
+        filename = OpenFileDialog();
+        if (filename.empty()) { gSystem->Exit(0); }
+    }
 
     TFile* tfile = new TFile(filename.c_str(), "read");
-    auto LAr_prob_map = dynamic_cast<TH3*>(tfile->Get("LAr_prob_map"));
+    if (!tfile->IsOpen()) { gSystem->Exit(1); };
+
+    LAr_prob_map = dynamic_cast<TH3*>(tfile->Get(objname.c_str()));
     if (!LAr_prob_map) {
-        std::cout << "ERROR: LAr_prob_map object not found!\n"
+        std::cout << "ERROR: " << objname << " object not found!\n"
                   << "File content:\n";
         tfile->ls();
         while (!LAr_prob_map) {
@@ -44,8 +113,14 @@ void gerdatomography(int rebin = 1) {
         }
     }
 
+    do_visualize(LAr_prob_map, rebin, array_closeup);
+}
+
+void do_visualize(TH3* LAr_prob_map, int rebin, bool array_closeup) {
+
     std::cout << "INFO: preparing histogram...\n";
     // this is needed for a meaningful rebin...
+    float max_prob = 0;
     for (int i = 0; i < LAr_prob_map->GetNcells(); ++i) {
         auto _p = LAr_prob_map->GetBinContent(i);
         if (_p < 0) LAr_prob_map->SetBinContent(i, 0);
@@ -130,12 +205,12 @@ void gerdatomography(int rebin = 1) {
     hp_xy->Draw("colz");
 
     // attach dynamic behaviour
-    main_pad->AddExec("dynamic", "dynamic_exec()");
+    main_pad->AddExec("dynamic", Form("dynamic_exec(%d, %f)", array_closeup, max_prob));
 
     return;
 }
 
-void dynamic_exec() {
+void dynamic_exec(bool array_closeup, float max_prob) {
 
     auto nbins = 1;
 
@@ -314,10 +389,10 @@ void dynamic_exec() {
     }
 
     if (array_closeup) {
-        hp_xz->GetXaxis()->SetRangeUser(xmin, xmax);
-        hp_xz->GetYaxis()->SetRangeUser(zmin, zmax);
-        hp_xy->GetXaxis()->SetRangeUser(xmin, xmax);
-        hp_xy->GetYaxis()->SetRangeUser(ymin, ymax);
+        hp_xz->GetXaxis()->SetRangeUser(-15, 15);
+        hp_xz->GetYaxis()->SetRangeUser(-35, 15);
+        hp_xy->GetXaxis()->SetRangeUser(-15, 15);
+        hp_xy->GetYaxis()->SetRangeUser(-17, 17);
     }
     c_xy->Update();
     c_xz->Update();
