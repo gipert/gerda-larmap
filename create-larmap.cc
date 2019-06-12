@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
 
     // load JSON settings
     auto configfile = argc > 1 ? std::string(argv[1]) : "prob-map-settings.json";
+    std::cout << "INFO: reading config file: " << configfile << std::endl;
     katrin::KTree config;
     try { katrin::KTreeFile(configfile).Read(config); }
     catch (katrin::KException &e) { std::cerr << e.what() << std::endl; }
