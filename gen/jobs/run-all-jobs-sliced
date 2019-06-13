@@ -8,7 +8,9 @@
 
 [ ! -d out/sliced-longitudinal ] && ./run-jobs-runid ../sliced/lar-vuv-longitudinal.mac.template 20 sliced-longitudinal
 [ ! -d out/sliced-transversal1 ] && ./run-jobs-runid ../sliced/lar-vuv-transversal1.mac.template 20 sliced-transversal1
-[ ! -d out/sliced-transversal2 ] && ./run-jobs-runid ../sliced/lar-vuv-transversal2.mac.template 20 sliced-transversal2
+[ ! -d out/sliced-transversal2 ] && ./run-jobs-runid ../sliced/lar-vuv-transversal2.mac.template 60 sliced-transversal2
 [ ! -d out/sliced-transversal3 ] && ./run-jobs-runid ../sliced/lar-vuv-transversal3.mac.template 20 sliced-transversal3
 [ ! -d out/sliced-transversal4 ] && ./run-jobs-runid ../sliced/lar-vuv-transversal4.mac.template 20 sliced-transversal4
 [ ! -d out/sliced-transversal5 ] && ./run-jobs-runid ../sliced/lar-vuv-transversal5.mac.template 20 sliced-transversal5
+
+[ ! -d out/sliced-longitudinal-array ] && ./run-jobs-runid ../sliced/lar-vuv-longitudinal-array.mac.template 40 sliced-longitudinal-array
