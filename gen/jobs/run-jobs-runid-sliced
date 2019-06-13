@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+# Author: Luigi Pertoldi - pertoldi@pd.infn.it
+# Created: Sun 24 Mar 2019
+#
+# USAGE: ./run-jobs-runid-sliced <template-mac> <num-of-jobs> [<run-name>] <abs-length> <metal-refl>
+
+manager="none"
+[ `command -v qsub`          ] && manager="qsub"
+[ `command -v condor_submit` ] && manager="condor"
+
+[ "$manager" == "none" ] \
+    && echo 'ERROR: no supported job scheduler available!' \
+    && exit 1
+
+echo "INFO: using $manager cluster manager"
+
+[ ! -f ./run-jobs-runid ] \
+    && echo "ERROR: must cd where 'run-jobs' is before running!" \
+    && exit
+
+if [ -z "$3" ]; then
+    runid=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 7 ; echo ''`
+    echo "INFO: using random run ID $runid"
+else
+    runid=$3
+    echo "INFO: using run ID $runid"
+fi
+
+if [ "$manager" == "qsub" ]; then
+    [ ! -f ../../bin/gerda-sw-all.simg ] \
+        && echo "ERROR: missing Singularity container ../../bin/gerda-sw-all.simg" \
+        && exit
+
+    echo "INFO: using ../../bin/gerda-sw-all.img container"
+fi
+
+mkdir -p out/$runid log/$runid
+
+for i in `seq 1 $2`; do
+    stamp=`date +%s%N | cut -b1-13`
+    sed -e "s|\${OUTNAME}|`pwd`/out/$runid/phmap-$stamp.root|g" \
+        -e "s|\${ABSLENGTH}|$4 cm|g" \
+        -e "s|\${METALREFL}|$5|g" \
+        $1 > log/$runid/phmap-$stamp.mac
+            [ "$manager" == "qsub" ] && qsub -N mage-$runid-$stamp mage-runner.qsub log/$runid/phmap-$stamp.mac
+        done
+
+[ "$manager" == "condor" ] && condor_submit -batch-name mage-$runid RUNID=$runid WORKDIR=`pwd` mage-runner.jdl
+
+echo "INFO: $2 jobs for run ID $runid successfully submitted to $manager"

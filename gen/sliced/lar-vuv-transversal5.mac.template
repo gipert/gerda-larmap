@@ -19,9 +19,9 @@
 /MG/geometry/general/constructMiniShroud          true
 /MG/geometry/general/constructLArInstrumentation  true
 
-/MG/materials/LAr/XUVAbsLength                    55 cm
+/MG/materials/LAr/XUVAbsLength                    ${ABSLENGTH}
 /MG/materials/LAr/PhotonYieldPerMeV               28120
-/MG/materials/ScaleMetalReflectivity              1.0
+/MG/materials/ScaleMetalReflectivity              ${METALREFL}
 
 /MG/geometry/LArInst/SetFiberCoverage             0.50
 /MG/geometry/LArInst/SegmentedFiberShroudRotation -141.0 deg
