@@ -47,6 +47,7 @@ int main(int argc, char** argv) {
         std::cout << "ERROR: LAr_prob_map object not found\n";
         return 1;
     }
+    h->SetName("LAr_prob_map_raw");
 
     // save some time by copying only the structure
     TH3F h_sm(
