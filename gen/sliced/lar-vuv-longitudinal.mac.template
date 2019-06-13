@@ -47,8 +47,8 @@
 /gps/polarization                                 1 1 1
 
 /MG/generator/Sampling/volume/name                Box
-/MG/generator/Sampling/volume/boxXLength          5 mm
-/MG/generator/Sampling/volume/boxYLength          77 cm
+/MG/generator/Sampling/volume/boxXLength          77 cm
+/MG/generator/Sampling/volume/boxYLength          5 mm
 /MG/generator/Sampling/volume/boxZLength          220 cm
 
 /MG/generator/Sampling/volume/offsetCenterXPos    0 mm
