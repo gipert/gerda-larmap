@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# Author: Luigi Pertoldi - pertoldi@pd.infn.it
+# Created: Sun 24 Mar 2019
+
+[ ! -f ./merge-all-sliced ] \
+    && echo "ERROR: must cd where 'merge-all-sliced' is before running!" \
+    && exit
+
+for f in out/gerda-larmap-sliced-longitudinal-abs*; do
+    id=`echo $f | cut -d- -f5-`
+    qsub -N merger-$id map-merger.qsub sliced-longitudinal-$id $f out/gerda-larmap-sliced-longitudinal-array-$id
+done
+
+qsub -N merger-longitudinal map-merger.qsub sliced-longitudinal out/gerda-larmap-sliced-longitudinal.root out/gerda-larmap-sliced-longitudinal-array.root
