@@ -23,7 +23,7 @@
 /MG/materials/LAr/PhotonYieldPerMeV               28120
 /MG/materials/ScaleMetalReflectivity              ${METALREFL}
 
-/MG/geometry/LArInst/SetFiberCoverage             0.50
+/MG/geometry/LArInst/SetFiberCoverage             ${FIBCOVERAGE}
 /MG/geometry/LArInst/SegmentedFiberShroudRotation -141.0 deg
 
 /MG/eventaction/reportingfrequency                5000

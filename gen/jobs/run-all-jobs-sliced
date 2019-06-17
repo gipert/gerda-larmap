@@ -8,36 +8,36 @@
 
 for abs in 5 10 15 20 25 55 75 100; do
     [ ! -d out/sliced-longitudinal-abs$abs-refl1.0 ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-longitudinal.mac.template 20 sliced-longitudinal-abs$abs-refl1.0 $abs 1.0
-    [ ! -d out/sliced-transversal1-abs$abs-refl1.0 ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-transversal1.mac.template 20 sliced-transversal1-abs$abs-refl1.0 $abs 1.0
-    [ ! -d out/sliced-transversal2-abs$abs-refl1.0 ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-transversal2.mac.template 60 sliced-transversal2-abs$abs-refl1.0 $abs 1.0
-    [ ! -d out/sliced-transversal3-abs$abs-refl1.0 ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-transversal3.mac.template 20 sliced-transversal3-abs$abs-refl1.0 $abs 1.0
-    [ ! -d out/sliced-transversal4-abs$abs-refl1.0 ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-transversal4.mac.template 20 sliced-transversal4-abs$abs-refl1.0 $abs 1.0
-    [ ! -d out/sliced-transversal5-abs$abs-refl1.0 ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-transversal5.mac.template 20 sliced-transversal5-abs$abs-refl1.0 $abs 1.0
-
+        ../sliced/lar-vuv-longitudinal.mac.template 20 sliced-longitudinal-abs$abs-refl1.0 $abs 1.0 0.5
     [ ! -d out/sliced-longitudinal-array-abs$abs-refl1.0 ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-longitudinal-array.mac.template 40 sliced-longitudinal-array-abs$abs-refl1.0 $abs 1.0
+        ../sliced/lar-vuv-longitudinal-array.mac.template 40 sliced-longitudinal-array-abs$abs-refl1.0 $abs 1.0 0.5
+
+    for i in `seq 1 5`; do
+        [ ! -d out/sliced-transversal$i-abs$abs-refl1.0 ] && ./run-jobs-runid-sliced \
+            ../sliced/lar-vuv-transversal$i.mac.template 20 sliced-transversal$i-abs$abs-refl1.0 $abs 1.0 0.5
+    done
 done
 
 for refl in 0.5 0.75 1.0 1.5 2.0; do
     [ ! -d out/sliced-longitudinal-abs55-refl$refl ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-longitudinal.mac.template 20 sliced-longitudinal-abs55-refl$refl 55 $refl
-    [ ! -d out/sliced-transversal1-abs55-refl$refl ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-transversal1.mac.template 20 sliced-transversal1-abs55-refl$refl 55 $refl
-    [ ! -d out/sliced-transversal2-abs55-refl$refl ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-transversal2.mac.template 60 sliced-transversal2-abs55-refl$refl 55 $refl
-    [ ! -d out/sliced-transversal3-abs55-refl$refl ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-transversal3.mac.template 20 sliced-transversal3-abs55-refl$refl 55 $refl
-    [ ! -d out/sliced-transversal4-abs55-refl$refl ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-transversal4.mac.template 20 sliced-transversal4-abs55-refl$refl 55 $refl
-    [ ! -d out/sliced-transversal5-abs55-refl$refl ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-transversal5.mac.template 20 sliced-transversal5-abs55-refl$refl 55 $refl
-
+        ../sliced/lar-vuv-longitudinal.mac.template 20 sliced-longitudinal-abs55-refl$refl 55 $refl 0.5
     [ ! -d out/sliced-longitudinal-array-abs55-refl$refl ] && ./run-jobs-runid-sliced \
-        ../sliced/lar-vuv-longitudinal-array.mac.template 40 sliced-longitudinal-array-abs55-refl$refl 55 $refl
+        ../sliced/lar-vuv-longitudinal-array.mac.template 40 sliced-longitudinal-array-abs55-refl$refl 55 $refl 0.5
+
+    for i in `seq 1 5`; do
+        [ ! -d out/sliced-transversal$i-abs55-refl$refl ] && ./run-jobs-runid-sliced \
+            ../sliced/lar-vuv-transversal$i.mac.template 20 sliced-transversal$i-abs55-refl$refl 55 $refl 0.5
+    done
+done
+
+for cov in 0.3 0.5 0.6 0.7 0.9; do
+    [ ! -d out/sliced-longitudinal-abs55-refl1.0-cov$cov ] && ./run-jobs-runid-sliced \
+        ../sliced/lar-vuv-longitudinal.mac.template 20 sliced-longitudinal-abs55-refl1.0-cov$cov 55 1.0 $cov
+    [ ! -d out/sliced-longitudinal-array-abs55-refl1.0-cov$cov ] && ./run-jobs-runid-sliced \
+        ../sliced/lar-vuv-longitudinal-array.mac.template 40 sliced-longitudinal-array-abs55-refl1.0-cov$cov 55 1.0 $cov
+
+    for i in `seq 1 5`; do
+        [ ! -d out/sliced-transversal$i-abs55-refl1.0-cov$cpv ] && ./run-jobs-runid-sliced \
+            ../sliced/lar-vuv-transversal$i.mac.template 20 sliced-transversal$i-abs55-refl1.0-cov$cov 55 1.0 $cov
+    done
 done
