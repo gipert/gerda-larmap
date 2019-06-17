@@ -6,7 +6,7 @@
 # generation rate depends on the CPU, on MPIK I've seen 30-60 sec / 1E5 ev
 # with 2.5E7 events macros this means 1.25-2.50 hours per job
 
-for abs in 10 25 55 75 100; do
+for abs in 5 10 15 20 25 55 75 100; do
     [ ! -d out/sliced-longitudinal-abs$abs-refl1.0 ] && ./run-jobs-runid-sliced \
         ../sliced/lar-vuv-longitudinal.mac.template 20 sliced-longitudinal-abs$abs-refl1.0 $abs 1.0
     [ ! -d out/sliced-transversal1-abs$abs-refl1.0 ] && ./run-jobs-runid-sliced \
