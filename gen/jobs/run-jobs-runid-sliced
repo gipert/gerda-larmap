@@ -3,7 +3,8 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 #
-# USAGE: ./run-jobs-runid-sliced <template-mac> <num-of-jobs> [<run-name>] <abs-length> <metal-refl>
+# USAGE: ./run-jobs-runid-sliced <template-mac> <num-of-jobs> [<run-name>] \
+#            <abs-length> <metal-refl> <fiber-coverage>
 
 manager="none"
 [ `command -v qsub`          ] && manager="qsub"
@@ -42,6 +43,7 @@ for i in `seq 1 $2`; do
     sed -e "s|\${OUTNAME}|`pwd`/out/$runid/phmap-$stamp.root|g" \
         -e "s|\${ABSLENGTH}|$4 cm|g" \
         -e "s|\${METALREFL}|$5|g" \
+        -e "s|\${FIBCOVERAGE}|$6|g" \
         $1 > log/$runid/phmap-$stamp.mac
             [ "$manager" == "qsub" ] && qsub -N mage-$runid-$stamp mage-runner.qsub log/$runid/phmap-$stamp.mac
         done
