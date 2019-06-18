@@ -19,6 +19,8 @@ gerda-larmap/map-merger jobs/out/*.root
 
 You can eventually smooth the final map by applying an average moving window filter. Use `map-smoother --width n file.root` for that.
 
+`larmap-doctor` is a useful tool to investigate the statistical solidity of your probability map. Be sure to understand what the program is doing by inspecting the source code.
+
 ## GERDA Tomography
 
 Run `./gerdatomography` to start a nice visualization tool for the just created probability map.
