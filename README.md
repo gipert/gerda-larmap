@@ -1,3 +1,5 @@
+<img src=".github/gerda-logo.png" align="left"  height="80"/>
+
 # gerda-larmap
 
 Toolbox to produce a detection probability map for 128nm photons in liquid argon in the GERDA experiment.
