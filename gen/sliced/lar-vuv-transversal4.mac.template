@@ -22,6 +22,7 @@
 /MG/materials/LAr/XUVAbsLength                    ${ABSLENGTH}
 /MG/materials/LAr/PhotonYieldPerMeV               28120
 /MG/materials/ScaleMetalReflectivity              ${METALREFL}
+/MG/materials/ScaleTPBQuantumEfficiency           ${TPBEFF}
 
 /MG/geometry/LArInst/SetFiberCoverage             ${FIBCOVERAGE}
 /MG/geometry/LArInst/SegmentedFiberShroudRotation -141.0 deg

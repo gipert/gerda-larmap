@@ -4,7 +4,7 @@
 # Created: Sun 24 Mar 2019
 #
 # USAGE: ./run-jobs-runid-sliced <template-mac> <num-of-jobs> [<run-name>] \
-#            <abs-length> <metal-refl> <fiber-coverage>
+#            <abs-length> <metal-refl> <fiber-coverage> <tpb-eff>
 
 manager="none"
 [ `command -v qsub`          ] && manager="qsub"
@@ -44,6 +44,7 @@ for i in `seq 1 $2`; do
         -e "s|\${ABSLENGTH}|$4 cm|g" \
         -e "s|\${METALREFL}|$5|g" \
         -e "s|\${FIBCOVERAGE}|$6|g" \
+        -e "s|\${TPBEFF}|$7|g" \
         $1 > log/$runid/phmap-$stamp.mac
             [ "$manager" == "qsub" ] && qsub -N mage-$runid-$stamp mage-runner.qsub log/$runid/phmap-$stamp.mac
         done
