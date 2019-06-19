@@ -170,6 +170,8 @@ void do_visualize(TH3* LAr_prob_map, int rebin, bool array_closeup) {
     xz_pad->Draw();
     xy_pad->Draw();
 
+    gStyle->SetPalette(kThermometer);
+
     main_pad->cd();
     LAr_prob_map->SetTitle("LAr photon detection probability map;x [cm];y [cm];z [cm]");
     LAr_prob_map->SetStats(false);
