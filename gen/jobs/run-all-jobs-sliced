@@ -54,7 +54,19 @@ for cov in 0.3 0.5 0.6 0.7 0.9; do
     done
 done
 
-for tpb in 0.5 2.0; do
+for cov in 0.3 0.5 0.7 0.9; do
+    [ ! -d out/sliced-longitudinal-abs15-refl1.0-cov$cov ] && ./run-jobs-runid-sliced \
+        ../sliced/lar-vuv-longitudinal.mac.template 20 sliced-longitudinal-abs15-refl1.0-cov$cov 15 1.0 $cov 1.0
+    [ ! -d out/sliced-longitudinal-array-abs15-refl1.0-cov$cov ] && ./run-jobs-runid-sliced \
+        ../sliced/lar-vuv-longitudinal-array.mac.template 40 sliced-longitudinal-array-abs15-refl1.0-cov$cov 15 1.0 $cov 1.0
+
+    for i in `seq 1 5`; do
+        [ ! -d out/sliced-transversal$i-abs15-refl1.0-cov$cov ] && ./run-jobs-runid-sliced \
+            ../sliced/lar-vuv-transversal$i.mac.template 20 sliced-transversal$i-abs15-refl1.0-cov$cov 15 1.0 $cov 1.0
+    done
+done
+
+for tpb in 0.5; do
     [ ! -d out/sliced-longitudinal-abs15-refl1.0-cov0.5-tpb$tpb ] && ./run-jobs-runid-sliced \
         ../sliced/lar-vuv-longitudinal.mac.template 20 sliced-longitudinal-abs15-refl1.0-cov0.5-tpb$tpb 15 1.0 0.5 $tpb
     [ ! -d out/sliced-longitudinal-array-abs15-refl1.0-cov0.5-tpb$tpb ] && ./run-jobs-runid-sliced \
