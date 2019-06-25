@@ -8,6 +8,7 @@
 manager="none"
 [ `command -v qsub`          ] && manager="qsub"
 [ `command -v condor_submit` ] && manager="condor"
+[ `command -v sbatch`        ] && manager="slurm"
 
 [ "$manager" == "none" ] \
     && echo 'ERROR: no supported job scheduler available!' \
@@ -40,7 +41,8 @@ mkdir -p out/$runid log/$runid
 for i in `seq 1 $2`; do
     stamp=`date +%s%N | cut -b1-13`
     sed -e "s|\${OUTNAME}|`pwd`/out/$runid/phmap-$stamp.root|g" $1 > log/$runid/phmap-$stamp.mac
-    [ "$manager" == "qsub" ] && qsub -N mage-$runid-$stamp mage-runner.qsub log/$runid/phmap-$stamp.mac
+    [ "$manager" == "qsub" ] && qsub -P short -N mage-$runid-$stamp mage-runner.qsub log/$runid/phmap-$stamp.mac
+    [ "$manager" == "slurm" ] && sbatch -J mage-$runid-$stamp mage-runner.slurm log/$runid/phmap-$stamp.mac
 done
 
 [ "$manager" == "condor" ] && condor_submit -batch-name mage-$runid RUNID=$runid WORKDIR=`pwd` mage-runner.jdl

@@ -5,7 +5,6 @@
 #
 # USAGE: qsub mage-runner.qsub <mage-macro-file>
 #
-#$ -P short ### queue
 #$ -j y     ### have logoutput and erroroutput in the same file
 #$ -cwd
 #$ -o /dev/null

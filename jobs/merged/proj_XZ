@@ -1,0 +1,25 @@
+//usr/bin/env root -l $0\(\"$1\"\); exit $?
+
+void proj_XZ(std::string filename) {
+    auto tf = TFile::Open(filename.c_str());
+    auto h = (TH3*)tf->Get("LAr_prob_map");
+
+    // this is needed for a meaningful rebin...
+    float max_prob = 0;
+    for (int i = 0; i < h->GetNcells(); ++i) {
+        auto _p = h->GetBinContent(i);
+        if (_p < 0) h->SetBinContent(i, 0);
+        if (_p > max_prob) max_prob = _p;
+    }
+
+    auto hp = (TH2*)h->Project3D("zx");
+    hp->SetMinimum(0);
+    hp->SetMaximum(max_prob);
+    hp->SetStats(false);
+
+    auto c = new TCanvas("c", "c", 500, 1000);
+    hp->Draw("colz");
+    gPad->SetLogz();
+}
+
+// vim: filetype=cpp

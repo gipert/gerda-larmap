@@ -1,0 +1,36 @@
+//usr/bin/env root -l $0\(\"$1\",\"$2\"\); exit $?
+
+void divide(std::string f1, std::string f2) {
+    auto tf1 = TFile::Open(f1.c_str());
+    auto h1 = (TH3*)tf1->Get("LAr_prob_map");
+    h1->SetName("h1");
+
+    auto tf2 = TFile::Open(f2.c_str());
+    auto h2 = (TH3*)tf2->Get("LAr_prob_map");
+    h1->SetName("h2");
+
+    // this is needed for a meaningful rebin...
+    for (int i = 0; i < h1->GetNcells(); ++i) {
+        auto _p = h1->GetBinContent(i);
+        if (_p < 0) h1->SetBinContent(i, 0);
+    }
+    for (int i = 0; i < h2->GetNcells(); ++i) {
+        auto _p = h2->GetBinContent(i);
+        if (_p < 0) h2->SetBinContent(i, 0);
+    }
+
+    auto hp1 = (TH2*)h1->Project3D("zx");
+    auto hp2 = (TH2*)h2->Project3D("zx");
+
+    hp1->Divide(hp2);
+
+    // hp1->SetMinimum(0.1);
+    // hp->SetMaximum(max_prob);
+    hp1->SetStats(false);
+
+    auto c = new TCanvas("c", "c", 500, 1000);
+    hp1->Draw("colz");
+    gPad->SetLogz();
+}
+
+// vim: filetype=cpp

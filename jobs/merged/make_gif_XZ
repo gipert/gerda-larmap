@@ -1,0 +1,63 @@
+//usr/bin/env root -l $0\(\); exit $?
+
+void do_it(std::vector<std::string> names, std::vector<std::string> titles, std::string out) {
+
+    gSystem->Unlink(out.c_str());
+
+    for (size_t i = 0; i < names.size(); ++i) {
+
+        std::cout << "adding " << "gerda-larmap-merged-sliced-longitudinal" + names[i] << std::endl;
+        TFile tf(("gerda-larmap-merged-sliced-longitudinal" + names[i]).c_str());
+        auto h = (TH3*)tf.Get("LAr_prob_map");
+
+        // this is needed for a meaningful rebin...
+        for (int j = 0; j < h->GetNcells(); ++j) {
+            auto _p = h->GetBinContent(j);
+            if (_p < 0) h->SetBinContent(j, 0);
+        }
+
+        auto hp = (TH2*)h->Project3D("zx");
+        hp->SetTitle(titles[i].c_str());
+        hp->SetMinimum(0);
+        hp->SetMaximum(1E-1);
+        hp->SetStats(false);
+
+        TCanvas c("c", "c", 500, 1000);
+        hp->Draw("colz");
+        gPad->SetLogz();
+
+        if (i != names.size()-1) c.SaveAs((out + "+100").c_str());
+        else                     c.SaveAs((out + "++100++").c_str());
+    }
+}
+
+void make_gif_XZ() {
+
+    gROOT->SetBatch();
+
+    do_it(
+        {
+            "-abs55-refl0.5.root.root",
+            "-abs55-refl0.75.root.root",
+            "-abs55-refl1.0.root.root",
+            "-abs55-refl1.5.root.root",
+            "-abs55-refl2.0.root.root"
+        },
+        {"refl x0.5", "refl x0.75", "refl x1.0", "refl x1.5", "refl x2.0"},
+        "longitudinal-abs55.gif"
+    );
+
+    do_it(
+        {
+            "-abs10-refl1.0.root.root",
+            "-abs25-refl1.0.root.root",
+            "-abs55-refl1.0.root.root",
+            "-abs75-refl1.0.root.root",
+            "-abs100-refl1.0.root.root"
+        },
+        {"abs. length 10 cm", "abs. length 25 cm", "abs. length 55 cm", "abs. length 75 cm", "abs. length 100 cm"},
+        "longitudinal-refl1.0.gif"
+    );
+}
+
+// vim: filetype=cpp
