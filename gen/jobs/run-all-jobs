@@ -27,7 +27,7 @@ done
 # 40x
 for i in `seq 10 49`; do
     [ ! -d out/top-0$i          ] && ./run-jobs-runid ../lar-vuv-top.mac.template         10 top-0$i
-    [ ! -d out/array-upper-0$i  ] && ./run-jobs-runid ../lar-vuv-array-upper.mac.template 10 array-upper-00$i
+    [ ! -d out/array-upper-0$i  ] && ./run-jobs-runid ../lar-vuv-array-upper.mac.template 10 array-upper-0$i
 done
 
 # 90x
