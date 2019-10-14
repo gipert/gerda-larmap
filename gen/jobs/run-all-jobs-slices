@@ -1,0 +1,79 @@
+#!/bin/bash
+#
+# Author: Luigi Pertoldi - pertoldi@pd.infn.it
+# Created: Sun 9 Jun 2019
+#
+# generation rate depends on the CPU, on MPIK I've seen 30-60 sec / 1E5 ev
+# with 2.5E7 events macros this means 1.25-2.50 hours per job
+
+for abs in 5 10 15 20 25 55 75 100; do
+    [ ! -d out/slices-longitudinal-abs$abs-refl1.0 ] && ./run-jobs-runid-slices \
+        ../slices/lar-vuv-longitudinal.mac.template 20 slices-longitudinal-abs$abs-refl1.0 $abs 1.0 0.5 1.0
+    [ ! -d out/slices-longitudinal-array-abs$abs-refl1.0 ] && ./run-jobs-runid-slices \
+        ../slices/lar-vuv-longitudinal-array.mac.template 40 slices-longitudinal-array-abs$abs-refl1.0 $abs 1.0 0.5 1.0
+
+    for i in `seq 1 5`; do
+        [ ! -d out/slices-transversal$i-abs$abs-refl1.0 ] && ./run-jobs-runid-slices \
+            ../slices/lar-vuv-transversal$i.mac.template 20 slices-transversal$i-abs$abs-refl1.0 $abs 1.0 0.5 1.0
+    done
+done
+
+for refl in 0.5 0.75 1.0 1.5 2.0; do
+    [ ! -d out/slices-longitudinal-abs55-refl$refl ] && ./run-jobs-runid-slices \
+        ../slices/lar-vuv-longitudinal.mac.template 20 slices-longitudinal-abs55-refl$refl 55 $refl 0.5 1.0
+    [ ! -d out/slices-longitudinal-array-abs55-refl$refl ] && ./run-jobs-runid-slices \
+        ../slices/lar-vuv-longitudinal-array.mac.template 40 slices-longitudinal-array-abs55-refl$refl 55 $refl 0.5 1.0
+
+    for i in `seq 1 5`; do
+        [ ! -d out/slices-transversal$i-abs55-refl$refl ] && ./run-jobs-runid-slices \
+            ../slices/lar-vuv-transversal$i.mac.template 20 slices-transversal$i-abs55-refl$refl 55 $refl 0.5 1.0
+    done
+done
+
+for refl in 0.5 1.0 2.0; do
+    [ ! -d out/slices-longitudinal-abs15-refl$refl ] && ./run-jobs-runid-slices \
+        ../slices/lar-vuv-longitudinal.mac.template 20 slices-longitudinal-abs15-refl$refl 15 $refl 0.5 1.0
+    [ ! -d out/slices-longitudinal-array-abs15-refl$refl ] && ./run-jobs-runid-slices \
+        ../slices/lar-vuv-longitudinal-array.mac.template 40 slices-longitudinal-array-abs15-refl$refl 15 $refl 0.5 1.0
+
+    for i in `seq 1 5`; do
+        [ ! -d out/slices-transversal$i-abs15-refl$refl ] && ./run-jobs-runid-slices \
+            ../slices/lar-vuv-transversal$i.mac.template 20 slices-transversal$i-abs15-refl$refl 15 $refl 0.5 1.0
+    done
+done
+
+for cov in 0.3 0.5 0.6 0.7 0.9; do
+    [ ! -d out/slices-longitudinal-abs55-refl1.0-cov$cov ] && ./run-jobs-runid-slices \
+        ../slices/lar-vuv-longitudinal.mac.template 20 slices-longitudinal-abs55-refl1.0-cov$cov 55 1.0 $cov 1.0
+    [ ! -d out/slices-longitudinal-array-abs55-refl1.0-cov$cov ] && ./run-jobs-runid-slices \
+        ../slices/lar-vuv-longitudinal-array.mac.template 40 slices-longitudinal-array-abs55-refl1.0-cov$cov 55 1.0 $cov 1.0
+
+    for i in `seq 1 5`; do
+        [ ! -d out/slices-transversal$i-abs55-refl1.0-cov$cov ] && ./run-jobs-runid-slices \
+            ../slices/lar-vuv-transversal$i.mac.template 20 slices-transversal$i-abs55-refl1.0-cov$cov 55 1.0 $cov 1.0
+    done
+done
+
+for cov in 0.3 0.5 0.7 0.9; do
+    [ ! -d out/slices-longitudinal-abs15-refl1.0-cov$cov ] && ./run-jobs-runid-slices \
+        ../slices/lar-vuv-longitudinal.mac.template 20 slices-longitudinal-abs15-refl1.0-cov$cov 15 1.0 $cov 1.0
+    [ ! -d out/slices-longitudinal-array-abs15-refl1.0-cov$cov ] && ./run-jobs-runid-slices \
+        ../slices/lar-vuv-longitudinal-array.mac.template 40 slices-longitudinal-array-abs15-refl1.0-cov$cov 15 1.0 $cov 1.0
+
+    for i in `seq 1 5`; do
+        [ ! -d out/slices-transversal$i-abs15-refl1.0-cov$cov ] && ./run-jobs-runid-slices \
+            ../slices/lar-vuv-transversal$i.mac.template 20 slices-transversal$i-abs15-refl1.0-cov$cov 15 1.0 $cov 1.0
+    done
+done
+
+for tpb in 0.5; do
+    [ ! -d out/slices-longitudinal-abs15-refl1.0-cov0.5-tpb$tpb ] && ./run-jobs-runid-slices \
+        ../slices/lar-vuv-longitudinal.mac.template 20 slices-longitudinal-abs15-refl1.0-cov0.5-tpb$tpb 15 1.0 0.5 $tpb
+    [ ! -d out/slices-longitudinal-array-abs15-refl1.0-cov0.5-tpb$tpb ] && ./run-jobs-runid-slices \
+        ../slices/lar-vuv-longitudinal-array.mac.template 40 slices-longitudinal-array-abs15-refl1.0-cov0.5-tpb$tpb 15 1.0 0.5 $tpb
+
+    for i in `seq 1 5`; do
+        [ ! -d out/slices-transversal$i-abs15-refl1.0-cov0.5-tpb$tpb ] && ./run-jobs-runid-slices \
+            ../slices/lar-vuv-transversal$i.mac.template 20 slices-transversal$i-abs15-refl1.0-cov0.5-tpb$tpb 15 1.0 0.5 $tpb
+    done
+done

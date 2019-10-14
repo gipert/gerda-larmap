@@ -14,13 +14,13 @@ manager="none"
 
 echo "INFO: using $manager cluster manager"
 
-[ ! -f ./run-all-jobs-sliced ] \
-    && echo "ERROR: must cd where 'run-all-jobs-sliced' is before running!" \
+[ ! -f ./run-all-jobs-slices ] \
+    && echo "ERROR: must cd where 'run-all-jobs-slices' is before running!" \
     && exit
 
 mkdir -p log out
 
-for d in ../gen/jobs/out/sliced-*; do
+for d in ../gen/jobs/out/slices-*; do
     runid=`basename $d`
     substr=`echo "$runid" | cut -d- -f2`
     if [ ! -f out/gerda-larmap-$runid.root ]; then

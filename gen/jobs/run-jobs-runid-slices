@@ -3,7 +3,7 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 #
-# USAGE: ./run-jobs-runid-sliced <template-mac> <num-of-jobs> [<run-name>] \
+# USAGE: ./run-jobs-runid-slices <template-mac> <num-of-jobs> [<run-name>] \
 #            <abs-length> <metal-refl> <fiber-coverage> <tpb-eff>
 
 manager="none"

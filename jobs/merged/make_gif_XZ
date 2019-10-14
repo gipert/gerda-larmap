@@ -6,8 +6,8 @@ void do_it(std::vector<std::string> names, std::vector<std::string> titles, std:
 
     for (size_t i = 0; i < names.size(); ++i) {
 
-        std::cout << "adding " << "gerda-larmap-merged-sliced-longitudinal" + names[i] << std::endl;
-        TFile tf(("gerda-larmap-merged-sliced-longitudinal" + names[i]).c_str());
+        std::cout << "adding " << "gerda-larmap-merged-slices-longitudinal" + names[i] << std::endl;
+        TFile tf(("gerda-larmap-merged-slices-longitudinal" + names[i]).c_str());
         auto h = (TH3*)tf.Get("LAr_prob_map");
 
         // this is needed for a meaningful rebin...
