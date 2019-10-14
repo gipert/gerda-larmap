@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# Author: Luigi Pertoldi - pertoldi@pd.infn.it
+# Created: Mon 14 Oct 2019
+
+def_abs=55
+def_refl=1.0
+def_cov=0.5
+def_tpb=1.0
+
+n_jobs=10
+
+points=(
+    "0 0 -50"
+    "0 0 -70"
+    "15 15 -10"
+)
+
+for point in "${points[@]}"; do
+    str_point=`echo "$point" | sed 's| |_|g'`
+    for abs in 5 10 15 20 25 35 45 55 75; do
+        if [[ ! -d out/point-$str_point-abs$abs ]]; then
+            ./run-jobs-runid-points ../points/lar-vuv-point.mac.template \
+                $n_jobs point-$str_point-abs$abs $abs $def_refl $def_cov $def_tpb $point
+        fi
+    done
+done
