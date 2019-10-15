@@ -213,6 +213,8 @@ void do_visualize(TH3* LAr_prob_map, int rebin, bool array_closeup) {
     return;
 }
 
+TBox *line_xz, *line_xy;
+
 void dynamic_exec(bool array_closeup, float max_prob) {
 
     auto nbins = 1;
@@ -361,6 +363,20 @@ void dynamic_exec(bool array_closeup, float max_prob) {
         hp_xz->Draw("colz");
     }
 
+    // red line for projection
+    if (!line_xz) {
+        line_xz = new TBox;
+        line_xz->SetFillColor(kRed);
+        line_xz->SetLineWidth(0);
+        line_xz->Draw();
+    }
+    line_xz->SetX1(hp_xz->GetXaxis()->GetXmin());
+    line_xz->SetY1(hp_xz->GetYaxis()->GetBinLowEdge(binz_xy));
+    line_xz->SetX2(hp_xz->GetXaxis()->GetXmax());
+    line_xz->SetY2(hp_xz->GetYaxis()->GetBinLowEdge(binz2_xy)
+            + hp_xz->GetYaxis()->GetBinWidth(binz2_xy));
+    line_xz->Draw();
+
     c_xy->Clear();
     c_xy->cd();
 
@@ -390,6 +406,20 @@ void dynamic_exec(bool array_closeup, float max_prob) {
         hp_xy->SetMaximum(max_prob);
         hp_xy->Draw("colz");
     }
+
+    // red line for projection
+    if (!line_xy) {
+        line_xy = new TBox;
+        line_xy->SetFillColor(kRed);
+        line_xy->SetLineWidth(0);
+        line_xy->Draw();
+    }
+    line_xy->SetX1(hp_xy->GetXaxis()->GetBinLowEdge(biny_xz));
+    line_xy->SetY1(hp_xy->GetYaxis()->GetXmin());
+    line_xy->SetX2(hp_xy->GetXaxis()->GetBinLowEdge(biny2_xz)
+            + hp_xy->GetXaxis()->GetBinWidth(binz2_xy));
+    line_xy->SetY2(hp_xy->GetYaxis()->GetXmax());
+    line_xy->Draw();
 
     if (array_closeup) {
         hp_xz->GetXaxis()->SetRangeUser(-15, 15);
