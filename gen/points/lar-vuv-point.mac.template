@@ -27,7 +27,7 @@
 /MG/geometry/LArInst/SetFiberCoverage             ${FIBCOVERAGE}
 /MG/geometry/LArInst/SegmentedFiberShroudRotation -141.0 deg
 
-/MG/eventaction/reportingfrequency                5000
+/MG/eventaction/reportingfrequency                1000000
 /MG/eventaction/rootschema                        GerdaInstrumentedArray
 /MG/eventaction/rootfilename                      ${OUTNAME}
 
@@ -56,4 +56,4 @@
 /MG/generator/Sampling/volume/offsetCenterYPos    ${Y} cm
 /MG/generator/Sampling/volume/offsetCenterZPos    ${Z} cm
 
-/run/beamOn                                       50000000
+/run/beamOn                                       100000000
