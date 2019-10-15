@@ -14,18 +14,18 @@ manager="none"
 
 echo "INFO: using $manager cluster manager"
 
-[ ! -f ./run-all-jobs-slices ] \
-    && echo "ERROR: must cd where 'run-all-jobs-slices' is before running!" \
+[ ! -f ./run-all-jobs-points ] \
+    && echo "ERROR: must cd where 'run-all-jobs-points' is before running!" \
     && exit
 
 mkdir -p log out
 
-for d in ../gen/jobs/out/slices-*; do
+for d in ../gen/jobs/out/points-*; do
     runid=`basename $d`
     substr=`echo "$runid" | cut -d- -f2`
     if [ ! -f out/gerda-larmap-$runid.root ]; then
-        [ "$manager" == "qsub"   ] && qsub -N larmap-$runid create-larmap.qsub $runid slices/prob-map-settings-$substr.json
+        [ "$manager" == "qsub"   ] && qsub -N larmap-$runid create-larmap.qsub $runid points/prob-map-settings-$substr.json
         [ "$manager" == "condor" ] && condor_submit -batch-name larmap-$runid WORKDIR=`pwd` RUNID=$runid create-larmap.jdl
-        [ "$manager" == "slurm"  ] && sbatch -J larmap-$runid create-larmap.slurm $runid slices/prob-map-settings-$substr.json
+        [ "$manager" == "slurm"  ] && sbatch -J larmap-$runid create-larmap.slurm $runid points/prob-map-settings-$substr.json
     fi
 done
