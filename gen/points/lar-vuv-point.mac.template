@@ -27,7 +27,7 @@
 /MG/geometry/LArInst/SetFiberCoverage             ${FIBCOVERAGE}
 /MG/geometry/LArInst/SegmentedFiberShroudRotation -141.0 deg
 
-/MG/eventaction/reportingfrequency                1000000
+/MG/eventaction/reportingfrequency                10000
 /MG/eventaction/rootschema                        GerdaInstrumentedArray
 /MG/eventaction/rootfilename                      ${OUTNAME}
 
@@ -48,12 +48,12 @@
 /gps/polarization                                 1 1 1
 
 /MG/generator/Sampling/volume/name                Box
-/MG/generator/Sampling/volume/boxXLength          1 cm
-/MG/generator/Sampling/volume/boxYLength          1 cm
-/MG/generator/Sampling/volume/boxZLength          1 cm
+/MG/generator/Sampling/volume/boxXLength          0.5 cm
+/MG/generator/Sampling/volume/boxYLength          0.5 cm
+/MG/generator/Sampling/volume/boxZLength          0.5 cm
 
 /MG/generator/Sampling/volume/offsetCenterXPos    ${X} cm
 /MG/generator/Sampling/volume/offsetCenterYPos    ${Y} cm
 /MG/generator/Sampling/volume/offsetCenterZPos    ${Z} cm
 
-/run/beamOn                                       100000000
+/run/beamOn                                       1000000
