@@ -44,9 +44,9 @@ for point in "${points[@]}"; do
     done
 
     for refl in 0.5 0.75 1 1.25 1.5; do
-        if [[ ! -d out/point-$str_point-cov$cov ]]; then
+        if [[ ! -d out/point-$str_point-refl$refl ]]; then
             ./run-jobs-runid-points ../points/lar-vuv-point.mac.template \
-                $n_jobs "point-$str_point-cov$cov" $def_abs $def_refl $cov $def_tpb $point
+                $n_jobs "point-$str_point-refl$refl" $def_abs $refl $def_cov $def_tpb $point
         fi
     done
 done
