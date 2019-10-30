@@ -12,5 +12,5 @@
 #$ -e /dev/null
 
 mkdir -p merged/log
-singularity exec ../bin/gerda-sw-all.simg \
-    ../bin/map-merger -o merged/gerda-larmap-merged-$1.root "${@:2}" &> merged/log/map-merger-$1.log
+singularity exec ../bin/gerda-larmap.simg \
+    map-merger -o merged/gerda-larmap-merged-$1.root "${@:2}" &> merged/log/map-merger-$1.log

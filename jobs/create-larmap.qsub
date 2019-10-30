@@ -11,7 +11,7 @@
 #$ -o /dev/null
 #$ -e /dev/null
 
-singularity exec ../bin/gerda-sw-all.simg \
-    ../bin/create-larmap ../settings/$2 \
-                     "../gen/jobs/out/$1/phmap-*.root" \
-                     out/gerda-larmap-$1.root &> log/create-larmap-$1.log
+singularity exec ../bin/gerda-larmap.simg \
+    create-larmap ../settings/$2 \
+        "../gen/jobs/out/$1/phmap-*.root" \
+        out/gerda-larmap-$1.root &> log/create-larmap-$1.log
