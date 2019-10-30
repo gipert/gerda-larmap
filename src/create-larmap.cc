@@ -24,7 +24,7 @@
 #include "gerda-ada/T4SimConfig.h"
 #include "gerda-ada/T4SimHandler.h"
 
-#include "ProgressBar.h"
+#include "progressbar.hpp"
 
 bool divide_maps(TH3* out, const TH3* h1, const TH3* h2);
 
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 
     reader.SetTree(&chain);
 
-    ProgressBar bar(chain.GetEntries());
+    progressbar bar(chain.GetEntries());
     chain.LoadTree(0);
 
     std::cout << "INFO: looping over events ";
@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
         simHandler.GetEntry(reader.GetCurrentEntry());
         if (simHandler.GetLArEvent()->GetIsVetoed()) vertex_hits_map.Fill(x[0], y[0], z[0]);
 
-        bar.Update();
+        bar.update();
     }
     std::cout << std::endl;
 

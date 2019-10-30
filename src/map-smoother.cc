@@ -17,7 +17,7 @@
 #include "TFile.h"
 #include "TH3F.h"
 
-#include "ProgressBar.h"
+#include "progressbar.hpp"
 
 int main(int argc, char** argv) {
 
@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
 
     std::cout << "INFO: using smoothing window size = " << ws << std::endl;
 
-    ProgressBar bar(nb_x*nb_y*nb_z);
+    progressbar bar(nb_x*nb_y*nb_z);
     std::cout << "INFO: ";
 
     // loop over the histogram cells (no over/underflow)
@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
                 // if bin does not contain LAr (-1), leave it as it is
                 if (h->GetBinContent(i, j, k) < 0) {
                     h_sm.SetBinContent(i, j, k, -1);
-                    bar.Update();
+                    bar.update();
                     continue;
                 }
                 // otherwise calculate the average over the surrounding cube
@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
                     }
                 }
                 h_sm.SetBinContent(i, j, k, _terms > 0 ? _sum/_terms : -1);
-                bar.Update();
+                bar.update();
             }
         }
     }

@@ -1,0 +1,8 @@
+*.simg
+*.sif
+*.root
+*.log
+*.out
+
+gen
+jobs
