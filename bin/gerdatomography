@@ -7,9 +7,11 @@
 
 #include "getopt.h"
 
+TH3* LAr_prob_map;
+
 const std::string OpenFileDialog();
 void dynamic_exec();
-void do_visualize(TH3* LAr_prob_map, int rebin, bool array_closeup);
+void do_visualize(int rebin, bool array_closeup);
 
 void usage() {
     std::cerr << "\n"
@@ -23,6 +25,31 @@ void usage() {
 }
 
 void gerdatomography(std::string args = "") {
+
+    // gStyle->SetCanvasPreferGL(true);
+
+    // default font
+    int font = 43;
+    int fontsize = 24;
+
+    // FIXME: I don't know how to set the hist title font size in pixels
+    // an the following does not work
+    // gStyle->SetTextFont(font);
+    // gStyle->SetTextSize(fontsize);
+
+    // pad title
+    gStyle->SetTitleFont(font);
+    gStyle->SetTitleSize(fontsize);
+
+    // axis titles
+    gStyle->SetTitleFont(font, "XYZ");
+    gStyle->SetTitleSize(fontsize, "XYZ");
+
+    // axis labels
+    gStyle->SetLabelFont(font, "XYZ");
+    gStyle->SetLabelSize(fontsize, "XYZ");
+
+    gROOT->ForceStyle();
 
     if (gROOT->GetVersionInt() < 60900) {
         std::cerr << "ERROR: this program works properly with ROOT >= 6.09\n";
@@ -78,7 +105,6 @@ void gerdatomography(std::string args = "") {
         extra_args.emplace_back(argv[optind]);
     }
 
-    TH3* LAr_prob_map;
     std::string filename = "";
     std::string objname = "LAr_prob_map";
 
@@ -113,12 +139,12 @@ void gerdatomography(std::string args = "") {
         }
     }
 
-    do_visualize(LAr_prob_map, rebin, array_closeup);
+    do_visualize(rebin, array_closeup);
 }
 
-void do_visualize(TH3* LAr_prob_map, int rebin, bool array_closeup) {
+void do_visualize(int rebin, bool array_closeup) {
 
-    std::cout << "INFO: preparing histogram...\n";
+    std::cout << "INFO: preparing histogram..." << std::endl;
     // this is needed for a meaningful rebin...
     float max_prob = 0;
     for (int i = 0; i < LAr_prob_map->GetNcells(); ++i) {
@@ -131,10 +157,29 @@ void do_visualize(TH3* LAr_prob_map, int rebin, bool array_closeup) {
     LAr_prob_map->Rebin3D(rebin, rebin, rebin);
     LAr_prob_map->Scale(1./(rebin*rebin*rebin));
 
-    std::cout << "INFO: displaying, this could take a while...\n";
+    LAr_prob_map->SetTitle("LAr photon detection probability map;x (cm);y (cm);z (cm)");
+    LAr_prob_map->SetLineColor(kBlack);
+    LAr_prob_map->SetStats(false);
+    LAr_prob_map->SetMinimum(0);
+    LAr_prob_map->SetMaximum(max_prob);
+
+    std::cout << "INFO: preparing 3D cut view" << std::endl;
+    auto LAr_prob_map_draw = dynamic_cast<TH3*>(LAr_prob_map->Clone("larmap_clone_to_draw"));
+    LAr_prob_map_draw->SetFillColor(kAzure-9);
+
+    for (int j = 1; j <= LAr_prob_map_draw->GetNbinsY(); ++j) {
+        if (LAr_prob_map_draw->GetYaxis()->GetBinCenter(j) < 0) {
+            for (int i = 1; i <= LAr_prob_map_draw->GetNbinsX(); ++i) {
+                for (int k = 1; k <= LAr_prob_map_draw->GetNbinsZ(); ++k) {
+                    LAr_prob_map_draw->SetBinContent(i, j, k, 0);
+                }
+            }
+        }
+    }
+
     auto canvas = new TCanvas(
         "gerda_tomography", "GERDA Tomography",
-        1800, 1000
+        1920, 1080
     );
     canvas->ToggleEventStatus();
 
@@ -144,26 +189,30 @@ void do_visualize(TH3* LAr_prob_map, int rebin, bool array_closeup) {
 
     auto main_pad = new TPad(
         "main_pad", "Main Pad",
-        0.0, 0.0, 0.33, 1.0
+        0.0, 0.0, 0.25, 1.0
     );
     main_pad->SetMargin(0, 0, 0, 0);
+    main_pad->SetPhi(30);
+    main_pad->SetTheta(10);
+
     auto xz_pad = new TPad(
         "xz_pad", "XZ Projection Pad",
-        0.33, 0.0, 0.66, 1.0
+        0.25, 0.0, 0.5, 1.0
     );
     xz_pad->SetLogz();
     xz_pad->SetGrid();
     xz_pad->SetTicks(1,1);
-    xz_pad->SetTopMargin(0.1);
+    xz_pad->SetTopMargin(0.07);
     xz_pad->SetRightMargin(0.12);
+
     auto xy_pad = new TPad(
         "xy_pad", "XY Projection Pad",
-        0.66, 0.33, 1.0, 1.0
+        0.5, 0.0, 1.0, 1.0
     );
     xy_pad->SetLogz();
     xy_pad->SetGrid();
     xy_pad->SetTicks(1,1);
-    xy_pad->SetTopMargin(0.14);
+    xy_pad->SetTopMargin(0.07);
     xy_pad->SetRightMargin(0.12);
 
     main_pad->Draw();
@@ -173,12 +222,10 @@ void do_visualize(TH3* LAr_prob_map, int rebin, bool array_closeup) {
     gStyle->SetPalette(kDarkBodyRadiator);
 
     main_pad->cd();
-    LAr_prob_map->SetTitle("LAr photon detection probability map;x [cm];y [cm];z [cm]");
-    LAr_prob_map->SetLineColor(kBlack);
-    LAr_prob_map->SetStats(false);
-    LAr_prob_map->SetMinimum(0);
-    LAr_prob_map->SetMaximum(max_prob);
-    LAr_prob_map->Draw("a fb bb lego");
+
+    std::cout << "INFO: displaying, this could take a while..." << std::endl;
+    LAr_prob_map_draw->Draw("a fb bb iso");
+    // LAr_prob_map->Draw("a fb bb iso");
 
     // pre-draw something
     auto hp_xz = dynamic_cast<TH2*>(LAr_prob_map->Project3D("zx"));
@@ -222,7 +269,7 @@ void dynamic_exec(bool array_closeup, float max_prob) {
     // check if mouse pointer is in the correct region
     auto *select = gPad->GetSelected();
     if (!select or !select->InheritsFrom(TH3::Class())) return;
-    auto h = dynamic_cast<TH3*>(select);
+    auto h = LAr_prob_map;
 
     // mouse pointer position
     int px = gPad->GetEventX();
