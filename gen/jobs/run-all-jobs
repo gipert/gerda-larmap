@@ -3,48 +3,27 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 #
-# generation rate depends on the CPU, on MPIK I've seen 30-60 sec / 1E5 ev
-# with 2.5E7 events macros this means 1.25-2.50 hours per job
-#
-# primary density factors:
-#   27       in bottom      = 1
-#   27+50    in top         = 2.8
-#   21+100   in array-lower = 5.7
-#   18+100   in array-upper = 9.3
-#   7+37+200 in array-inner = 31
-#   200      in outer       = 1.2*36
+# generation rate depends on the CPU, on MPIK I've seen ~2700 ev/s
 
-# 10x
+source ./library.sh
+
+batch_size=100
+
+for i in `seq 0 4`; do
+    process_simulation_run lar-vuv-top         $i ${batch_size}
+    process_simulation_run lar-vuv-array-upper $i ${batch_size}
+done
+
 for i in `seq 0 9`; do
-    [ ! -d out/complete-00$i    ] && ./run-jobs-runid ../lar-vuv-complete.mac.template    20 complete-00$i
-    [ ! -d out/top-00$i         ] && ./run-jobs-runid ../lar-vuv-top.mac.template         20 top-00$i
-    [ ! -d out/array-lower-00$i ] && ./run-jobs-runid ../lar-vuv-array-lower.mac.template 20 array-lower-00$i
-    [ ! -d out/array-upper-00$i ] && ./run-jobs-runid ../lar-vuv-array-upper.mac.template 20 array-upper-00$i
-    [ ! -d out/array-inner-00$i ] && ./run-jobs-runid ../lar-vuv-array-inner.mac.template 20 array-inner-00$i
-    [ ! -d out/outer-00$i       ] && ./run-jobs-runid ../lar-vuv-outer.mac.template       20 outer-00$i
+    process_simulation_run lar-vuv-complete    $i ${batch_size}
+    process_simulation_run lar-vuv-array-lower $i ${batch_size}
+    process_simulation_run lar-vuv-array-upper $i ${batch_size}
 done
 
-# 40x
-for i in `seq 10 49`; do
-    [ ! -d out/top-0$i          ] && ./run-jobs-runid ../lar-vuv-top.mac.template         20 top-0$i
-    [ ! -d out/array-upper-0$i  ] && ./run-jobs-runid ../lar-vuv-array-upper.mac.template 20 array-upper-0$i
+for i in `seq 0 19`; do
+    process_simulation_run lar-vuv-outer       $i ${batch_size}
 done
 
-# 90x
-for i in `seq 10 99`; do
-    [ ! -d out/complete-0$i     ] && ./run-jobs-runid ../lar-vuv-complete.mac.template    20 complete-0$i
-    [ ! -d out/array-lower-0$i  ] && ./run-jobs-runid ../lar-vuv-array-lower.mac.template 20 array-lower-0$i
-    [ ! -d out/array-upper-0$i  ] && ./run-jobs-runid ../lar-vuv-array-upper.mac.template 20 array-upper-0$i
-    [ ! -d out/array-inner-0$i  ] && ./run-jobs-runid ../lar-vuv-array-inner.mac.template 20 array-inner-0$i
-    [ ! -d out/outer-0$i        ] && ./run-jobs-runid ../lar-vuv-outer.mac.template       20 outer-0$i
-done
-
-# 100x
-for i in `seq 100 199`; do
-    [ ! -d out/array-inner-$i   ] && ./run-jobs-runid ../lar-vuv-array-inner.mac.template 20 array-inner-$i
-    [ ! -d out/outer-$i         ] && ./run-jobs-runid ../lar-vuv-outer.mac.template       20 outer-$i
-done
-
-for i in `seq 200 499`; do
-    [ ! -d out/array-inner-$i   ] && ./run-jobs-runid ../lar-vuv-array-inner.mac.template 20 array-inner-$i
+for i in `seq 0 49`; do
+    process_simulation_run lar-vuv-array-inner $i ${batch_size}
 done

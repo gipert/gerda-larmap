@@ -1,12 +1,9 @@
 *.img
 *.simg
 *.root
-log
-out
-create-larmap
-larmap-doctor
-map-merger
-map-smoother
+bin
+/gen/jobs/sim
+/jobs/output
 
 # junk
 *.DS_Store

@@ -4,25 +4,23 @@
 # Created: Sun 24 Mar 2019
 
 manager="none"
-[ `command -v qsub`          ] && manager="qsub"
-[ `command -v condor_submit` ] && manager="condor"
+[ `command -v qsub` ] && manager="qsub"
 
 [ "$manager" == "none" ] \
-      && echo 'ERROR: no supported job scheduler available!' \
+      && \echo 'ERROR: no supported job scheduler available!' \
       && exit 1
 
-echo "INFO: using $manager cluster manager"
+\echo "INFO: using $manager cluster manager"
 
 [ ! -f ./run-all-jobs ] \
-    && echo "ERROR: must cd where 'run-all-jobs' is before running!" \
+    && \echo "ERROR: must cd where 'run-all-jobs' is before running!" \
     && exit
 
-mkdir -p log out
+\mkdir -p output
 
-for d in ../gen/jobs/out/*; do
+for d in ../gen/jobs/sim/*; do
     runid=`basename $d`
-    if [ ! -f out/gerda-larmap-$runid.root ]; then
-        [ "$manager" == "qsub"   ] && qsub -N larmap-$runid create-larmap.qsub $runid prob-map-settings.json
-        [ "$manager" == "condor" ] && condor_submit -batch-name larmap-$runid WORKDIR=`pwd` RUNID=$runid create-larmap.jdl
+    if [ ! -f output/gerda-larmap-$runid.root ]; then
+        [ "$manager" == "qsub" ] && \qsub -N larmap-$runid create-larmap.qsub $runid prob-map-settings.json
     fi
 done

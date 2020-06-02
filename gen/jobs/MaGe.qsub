@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# Author: Luigi Pertoldi - pertoldi@pd.infn.it
+# Created: Sun 24 Mar 2019
+#
+# USAGE: qsub mage-runner.qsub <mage-macro-file>
+#
+#$ -j y
+#$ -cwd
+#$ -p -1
+#$ -o /dev/null
+#$ -e /dev/null
+
+macro="${1}-`printf "%05d" ${SGE_TASK_ID}`.mac"
+logfile="${macro%.*}.out"
+echo "Container: `readlink -f ../gerda-sw-all_active.sif`" > $logfile
+
+singularity exec ../../bin/gerda-sw-all.sif /usr/bin/time -v \
+    MaGe --no-colors "$macro" &>> $logfile
