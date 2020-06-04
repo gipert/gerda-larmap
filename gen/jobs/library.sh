@@ -3,7 +3,7 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 
-dryrun=`false`
+dryrun=false
 sim_dir="sim"
 
 print_log() {
@@ -56,38 +56,48 @@ submit_mage_job() {
 
     local job_name="$1"; shift
 
+    \cd "$sim_dir"
+
     if is_job_running "$sim_id"; then
         print_log warn "'$sim_id' jobs look already running, won't submit"
     else
         if [[ $manager == "qsub" ]]; then
-            \qsub -P short -N "$job_name" MaGe.qsub "$@"
+            \qsub -P short -N "$job_name" ../MaGe.qsub "$@"
         elif [[ $manager == "slurm" ]]; then
-            \sbatch -J "$job_name" MaGe.qsub "$@"
+            \sbatch -J "$job_name" ../MaGe.qsub "$@"
         # add your cluster manager here...
         fi
     fi
+
+    \cd - > /dev/null
 }
 
 submit_mage_job_array() {
 
-    local job_name="$1"; shift
-    local start_idx=$2; shift
-    local stop_idx=$3; shift
+    local job_name="$1";
+    local start_idx=$2;
+    local stop_idx=$3;
+    shift 3
+
+    \cd "$sim_dir"
 
     if [[ $manager == "qsub" ]]; then
         if $dryrun; then
-            echo "qsub -P short -N $job_name -t ${start_idx}-${stop_idx} MaGe.qsub $@"
+            print_log info "qsub -P short -N $job_name -t ${start_idx}-${stop_idx} ../MaGe.qsub $@"
         else
-            \qsub -P short -N "$job_name" -t ${start_idx}-${stop_idx} MaGe.qsub "$@"
+            \qsub -P short -N "$job_name" -t ${start_idx}-${stop_idx} ../MaGe.qsub "$@"
         fi
     # add your cluster manager here...
     fi
+
+    \cd - > /dev/null
 }
 
 is_job_running() {
 
     # cache job list
     if [[ "$joblist" == "" ]]; then
+        print_log info "getting list of running jobs"
         if [[ $manager == "qsub" ]]; then
             joblist=`\qstat -r | grep 'Full jobname:'`
             # add your cluster manager here...
@@ -95,7 +105,8 @@ is_job_running() {
     fi
 
     local job_name="$1";
-    echo "$joblist" | grep "$job_name"
+    echo "$joblist" | grep "$job_name" > /dev/null
+    [[ $? == 1 ]] && return 1 || return 0
 }
 
 submit_mage_runid_jobs() {
@@ -127,10 +138,12 @@ submit_mage_runid_jobs() {
 
 process_simulation_run() {
 
+    joblist=""
+
     $dryrun && print_log warn "running in dry-run mode, no jobs will be actually sent"
 
     local template="$1"
-    local copy_num=$2
+    local copy_num=$(printf "%05d" $2)
     local n_macros=$3
     local start_id=${4:-1}
 

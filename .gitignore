@@ -1,5 +1,4 @@
-*.img
-*.simg
+*.sif
 *.root
 bin
 /gen/jobs/sim

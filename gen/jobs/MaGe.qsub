@@ -7,13 +7,13 @@
 #
 #$ -j y
 #$ -cwd
-#$ -p -1
+#$ -p -2
 #$ -o /dev/null
 #$ -e /dev/null
 
 macro="${1}-`printf "%05d" ${SGE_TASK_ID}`.mac"
 logfile="${macro%.*}.out"
-echo "Container: `readlink -f ../gerda-sw-all_active.sif`" > $logfile
+echo "Container: `readlink -f ../../../gerda-sw-all_active.sif`" > $logfile
 
-singularity exec ../../bin/gerda-sw-all.sif /usr/bin/time -v \
+singularity exec ../../../gerda-sw-all_active.sif /usr/bin/time -v \
     MaGe --no-colors "$macro" &>> $logfile
