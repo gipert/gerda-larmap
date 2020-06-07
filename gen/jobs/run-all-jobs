@@ -20,7 +20,7 @@ for id in `seq 1 60`; do
     process_simulation_run lar-vuv-complete    $id $batch_size $start_idx
 done
 
-for id in `seq 1 30`; do
+for id in `seq 1 20`; do
     process_simulation_run lar-vuv-top         $id $batch_size $start_idx
 done
 
