@@ -3,27 +3,39 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 #
-# generation rate depends on the CPU, on MPIK I've seen ~2700 ev/s
+# generation rate depends on the CPU, generally:
+# - complete    -> 100 ev/s
+# - top         -> 30 ev/s
+# - outer       -> 5000 ev/s
+# - array-inner -> 4000 ev/s
+# - array-lower -> 2000 ev/s
+# - array-upper -> 500 ev/s
 
 source ./library.sh
 
-batch_size=200
+batch_size=400
 start_idx=${START_IDX:-1}
 
-for id in `seq 1 5`; do
+for id in `seq 1 60`; do
+    process_simulation_run lar-vuv-complete    $id $batch_size $start_idx
+done
+
+for id in `seq 1 30`; do
     process_simulation_run lar-vuv-top         $id $batch_size $start_idx
 done
 
-for id in `seq 1 10`; do
-    process_simulation_run lar-vuv-complete    $id $batch_size $start_idx
-    process_simulation_run lar-vuv-array-lower $id $batch_size $start_idx
+for id in `seq 1 15`; do
     process_simulation_run lar-vuv-array-upper $id $batch_size $start_idx
 done
 
-for id in `seq 1 20`; do
-    process_simulation_run lar-vuv-outer       $id $batch_size $start_idx
+for id in `seq 1 3`; do
+    process_simulation_run lar-vuv-array-lower $id $batch_size $start_idx
 done
 
-for id in `seq 1 50`; do
+for id in `seq 1 6`; do
     process_simulation_run lar-vuv-array-inner $id $batch_size $start_idx
+done
+
+for id in `seq 1 1`; do
+    process_simulation_run lar-vuv-outer-slice $id $batch_size $start_idx
 done
