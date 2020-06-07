@@ -118,22 +118,22 @@ submit_mage_runid_jobs() {
 
     local do_rerun=false
     for i in `seq -f "%05g" $start_idx $stop_idx`; do
-        if [[ ! -f "$sim_id/output/${sim_id}-${i}.root" ]]; then
+        if [[ ! -f "$sim_dir/$sim_id/output/${sim_id}-${i}.root" ]]; then
             do_rerun=true
         fi
     done
 
     if $do_rerun; then
         print_log info "submitting '$job_name' jobs"
+
+        if is_job_running "$job_name"; then
+            print_log warn "'$job_name' jobs look already running, won't submit"
+        else
+            submit_mage_job_array "$job_name" $start_idx $stop_idx "$sim_id/macros/$sim_id"
+        fi
     else
         print_log warn "'$job_name' jobs look up to date, won't submit"
         return
-    fi
-
-    if is_job_running "$job_name"; then
-        print_log warn "'$job_name' jobs look already running, won't submit"
-    else
-        submit_mage_job_array "$job_name" $start_idx $stop_idx "$sim_id/macros/$sim_id"
     fi
 }
 
