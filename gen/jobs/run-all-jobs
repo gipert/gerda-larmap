@@ -7,23 +7,23 @@
 
 source ./library.sh
 
-batch_size=100
+batch_size=200
+start_idx=${START_IDX:-1}
 
-for i in `seq 0 4`; do
-    process_simulation_run lar-vuv-top         $i ${batch_size}
-    process_simulation_run lar-vuv-array-upper $i ${batch_size}
+for id in `seq 1 5`; do
+    process_simulation_run lar-vuv-top         $id $batch_size $start_idx
 done
 
-for i in `seq 0 9`; do
-    process_simulation_run lar-vuv-complete    $i ${batch_size}
-    process_simulation_run lar-vuv-array-lower $i ${batch_size}
-    process_simulation_run lar-vuv-array-upper $i ${batch_size}
+for id in `seq 1 10`; do
+    process_simulation_run lar-vuv-complete    $id $batch_size $start_idx
+    process_simulation_run lar-vuv-array-lower $id $batch_size $start_idx
+    process_simulation_run lar-vuv-array-upper $id $batch_size $start_idx
 done
 
-for i in `seq 0 19`; do
-    process_simulation_run lar-vuv-outer       $i ${batch_size}
+for id in `seq 1 20`; do
+    process_simulation_run lar-vuv-outer       $id $batch_size $start_idx
 done
 
-for i in `seq 0 49`; do
-    process_simulation_run lar-vuv-array-inner $i ${batch_size}
+for id in `seq 1 50`; do
+    process_simulation_run lar-vuv-array-inner $id $batch_size $start_idx
 done
