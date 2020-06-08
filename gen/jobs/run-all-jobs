@@ -13,10 +13,10 @@
 
 source ./library.sh
 
-batch_size=400
+batch_size=250
 start_idx=${START_IDX:-1}
 
-for id in `seq 1 60`; do
+for id in `seq 1 40`; do
     process_simulation_run lar-vuv-complete    $id $batch_size $start_idx
 done
 
@@ -32,7 +32,7 @@ for id in `seq 1 3`; do
     process_simulation_run lar-vuv-array-lower $id $batch_size $start_idx
 done
 
-for id in `seq 1 6`; do
+for id in `seq 1 5`; do
     process_simulation_run lar-vuv-array-inner $id $batch_size $start_idx
 done
 
