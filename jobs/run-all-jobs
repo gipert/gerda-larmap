@@ -3,24 +3,7 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 
-manager="none"
-[ `command -v qsub` ] && manager="qsub"
+BASEDIR=`realpath $(dirname "$0")/../`
+source $BASEDIR/src/library.sh
 
-[ "$manager" == "none" ] \
-      && \echo 'ERROR: no supported job scheduler available!' \
-      && exit 1
-
-\echo "INFO: using $manager cluster manager"
-
-[ ! -f ./run-all-jobs ] \
-    && \echo "ERROR: must cd where 'run-all-jobs' is before running!" \
-    && exit
-
-\mkdir -p output
-
-for d in ../gen/jobs/sim/*; do
-    runid=`basename $d`
-    if [ ! -f output/gerda-larmap-$runid.root ]; then
-        [ "$manager" == "qsub" ] && \qsub -N larmap-$runid create-larmap.qsub $runid prob-map-settings.json
-    fi
-done
+submit_post_processing_jobs

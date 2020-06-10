@@ -11,7 +11,8 @@
 # - array-lower -> 2000 ev/s
 # - array-upper -> 500 ev/s
 
-source ./library.sh
+BASEDIR=`realpath $(dirname "$0")/../../`
+source ../../src/library.sh
 
 batch_size=250
 start_idx=${START_IDX:-1}

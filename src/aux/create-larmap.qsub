@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# Author: Luigi Pertoldi - pertoldi@pd.infn.it
+# Created: Sun 24 Mar 2019
+#
+# USAGE: qsub create-larmap.qsub <runid>
+#
+#$ -P short
+#$ -j y
+#$ -cwd
+#$ -o /dev/null
+#$ -e /dev/null
+
+basedir=`realpath $(dirname "$0")/../..`
+
+singularity exec "${basedir}/gerda-larmap.sif" \
+    create-larmap "${basedir}/settings/$2" \
+        "${basedir}/gen/jobs/sim/$1/phmap-*.root" \
+        "${basedir}/jobs/output/gerda-larmap-$1.root" &> "${basedir}/output/create-larmap-$1.log"

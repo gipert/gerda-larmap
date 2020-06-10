@@ -3,8 +3,10 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 
-dryrun=false
-sim_dir="sim"
+dryrun=true
+basedir=${BASEDIR:-`realpath $(dirname "$0")/..`}
+sim_dir=${SIM_DIR:-"${basedir}/gen/jobs/sim"}
+templates_dir="${basedir}/gen"
 
 print_log() {
     case "$1" in
@@ -67,26 +69,6 @@ fill_template_macro_point() {
         "$template_file"
 }
 
-submit_mage_job() {
-
-    local job_name="$1"; shift
-
-    \cd "$sim_dir"
-
-    if is_job_running "$sim_id"; then
-        print_log warn "'$sim_id' jobs look already running, won't submit"
-    else
-        if [[ $manager == "qsub" ]]; then
-            \qsub -P short -N "$job_name" ../MaGe.qsub "$@"
-        elif [[ $manager == "slurm" ]]; then
-            \sbatch -J "$job_name" ../MaGe.qsub "$@"
-        # add your cluster manager here...
-        fi
-    fi
-
-    \cd - > /dev/null
-}
-
 submit_mage_job_array() {
 
     local job_name="$1";
@@ -94,18 +76,18 @@ submit_mage_job_array() {
     local stop_idx=$3;
     shift 3
 
-    \cd "$sim_dir"
+    \cd "${sim_dir}"
 
     if [[ $manager == "qsub" ]]; then
         if $dryrun; then
-            print_log info "qsub -P short -N $job_name -t ${start_idx}-${stop_idx} ../MaGe.qsub $@"
+            print_log info "qsub -P short -N $job_name -t ${start_idx}-${stop_idx} ${basedir}/src/aux/MaGe.qsub $@"
         else
-            \qsub -P short -N "$job_name" -t ${start_idx}-${stop_idx} ../MaGe.qsub "$@"
+            \qsub -P short -N "$job_name" -t ${start_idx}-${stop_idx} "${basedir}/src/aux/MaGe.qsub" "$@"
         fi
     # add your cluster manager here...
     fi
 
-    \cd - > /dev/null
+    \cd - >/dev/null
 }
 
 is_job_running() {
@@ -116,6 +98,8 @@ is_job_running() {
         if [[ $manager == "qsub" ]]; then
             joblist=`\qstat -r | grep 'Full jobname:'`
             # add your cluster manager here...
+        else
+            joblist="empty"
         fi
     fi
 
@@ -163,8 +147,8 @@ process_simulation_run() {
     local n_macros=$3
     local start_id=${4:-1}
 
-    if [[ ! -f "../${template}.mac.template" ]]; then
-        print_log err "../${template}.mac.template: no such file or directory"
+    if [[ ! -f "${templates_dir}/${template}.mac.template" ]]; then
+        print_log err "${templates_dir}/${template}.mac.template: no such file or directory"
         return
     fi
 
@@ -174,7 +158,7 @@ process_simulation_run() {
     \mkdir -p "$sim_dir/$name_id"/{macros,output}
 
     for i in `seq -f "%05g" $start_id $(expr $start_id + $n_macros - 1)`; do
-        fill_template_macro "../${template}.mac.template" "${name_id}/output/${name_id}-${i}.root" \
+        fill_template_macro "${templates_dir}/${template}.mac.template" "${name_id}/output/${name_id}-${i}.root" \
             > "$sim_dir/${name_id}/macros/${name_id}-${i}.mac"
     done
 
@@ -199,8 +183,8 @@ process_simulation_run_point() {
     local n_macros=${10}
     local start_id=${11:-1}
 
-    if [[ ! -f "../points/${template}.mac.template" ]]; then
-        print_log err "../points/${template}.mac.template: no such file or directory"
+    if [[ ! -f "${templates_dir}/points/${template}.mac.template" ]]; then
+        print_log err "${templates_dir}/points/${template}.mac.template: no such file or directory"
         return
     fi
 
@@ -210,11 +194,62 @@ process_simulation_run_point() {
     \mkdir -p "$sim_dir/$name_id"/{macros,output}
 
     for i in `seq -f "%05g" $start_id $(expr $start_id + $n_macros - 1)`; do
-        fill_template_macro_point "../points/${template}.mac.template" \
+        fill_template_macro_point "${templates_dir}/points/${template}.mac.template" \
             "${name_id}/output/${name_id}-${i}.root" \
             $absl $refl $cov $tpbeff $x $y $z \
             > "$sim_dir/${name_id}/macros/${name_id}-${i}.mac"
     done
 
     submit_mage_runid_jobs $name_id $start_id $(expr $start_id + $n_macros - 1)
+}
+
+submit_create_larmap_job() {
+
+    local sim_id="$1";
+    local job_name="larmap-${sim_id}"
+
+    print_log info "qsub -P short -N $job_name ${basedir}/src/aux/create-larmap.qsub $@"
+
+    if is_job_running "$job_name"; then
+        print_log warn "'$job_name' jobs look already running, won't submit"
+    else
+        if [[ $manager == "qsub" ]]; then
+            if $dryrun; then
+                print_log info "qsub -P short -N $job_name ${basedir}/src/aux/create-larmap.qsub $@"
+            else
+                \qsub -P short -N "$job_name" "${basedir}/src/aux/create-larmap.qsub" "$@"
+            fi
+        elif [[ $manager == "slurm" ]]; then
+            \sbatch -J "$job_name" "${basedir}/src/aux/create-larmap.slurm" "$@"
+        # add your cluster manager here...
+        fi
+    fi
+}
+
+submit_post_processing_jobs() {
+
+    for sim_id in `\ls "${sim_dir}"`; do
+
+        local job_name="larmap-${sim_id}"
+
+        if [[ ! -f "jobs/output/gerda-larmap-${sim_id}.root" ]]; then
+
+            print_log info "submitting '$job_name' jobs"
+
+            if [[ "$sim_id" =~ ^lar-vuv-point-.* ]]; then
+                if [[ "$sim_id" =~ .*-(-?[0-9]+_-?[0-9]+_-?[0-9]+)-.* ]]; then
+                    substr="${BASH_REMATCH[1]}"
+                    submit_create_larmap_job "$sim_id" "${basedir}/settings/points/prob-map-settings-${substr}.json"
+                else
+                    print_log err "malformed point simulation id"
+                fi
+            else
+                submit_create_larmap_job "$sim_id" "${basedir}/settings/prob-map-settings.json"
+            fi
+
+        else
+            print_log warn "'$job_name' jobs look up to date, won't submit"
+            return
+        fi
+    done
 }
