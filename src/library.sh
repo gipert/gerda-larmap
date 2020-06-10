@@ -208,8 +208,6 @@ submit_create_larmap_job() {
     local sim_id="$1";
     local job_name="larmap-${sim_id}"
 
-    print_log info "qsub -P short -N $job_name ${basedir}/src/aux/create-larmap.qsub $@"
-
     if is_job_running "$job_name"; then
         print_log warn "'$job_name' jobs look already running, won't submit"
     else
@@ -228,7 +226,9 @@ submit_create_larmap_job() {
 
 submit_post_processing_jobs() {
 
-    for sim_id in `\ls "${sim_dir}"`; do
+    pattern=${1:-"lar-vuv-*"}
+
+    for sim_id in `\find "$sim_dir" -maxdepth 1 -name "$pattern" | sed "s|$sim_dir/||g"`; do
 
         local job_name="larmap-${sim_id}"
 

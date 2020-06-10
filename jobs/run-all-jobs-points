@@ -1,0 +1,9 @@
+#!/bin/bash
+#
+# Author: Luigi Pertoldi - pertoldi@pd.infn.it
+# Created: Sun 24 Mar 2019
+
+BASEDIR=`realpath $(dirname "$0")/../`
+source $BASEDIR/src/library.sh
+
+submit_post_processing_jobs "lar-vuv-point-*"
