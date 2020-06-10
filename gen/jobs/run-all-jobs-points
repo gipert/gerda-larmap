@@ -14,7 +14,6 @@ points=(
     "0 30 40"  # outside fibers
     "0 30 0"   # outside fibers
     "0 30 -30" # outside fibers
-    "0 20 40"  # between array and fibers
     "0 20 0"   # between array and fibers
     "0 20 -30" # between array and fibers
     "0 0 20"   # above array
@@ -23,44 +22,30 @@ points=(
     "0 0 -70"  # below array
     "0 0 -95"  # below array
     "11 0 -24" # between GD02B and GD02D in string 1
+    "7 0 -5"   #
+    "-7 0 6"   #
 )
 
+source ./library.sh
+
 for point in "${points[@]}"; do
+
     str_point=`echo "$point" | sed 's| |_|g'`
 
     for abs in 5 10 15 20 25 35 45 55 75; do
-        if [[ ! -d out/point-$str_point-abs$abs ]]; then
-            ./run-jobs-runid-points ../points/lar-vuv-point.mac.template \
-                $n_jobs "point-$str_point-abs$abs" $abs $def_refl $def_cov $def_tpb $point
-        fi
+        process_simulation_run_point lar-vuv-point $abs $def_refl $def_cov $def_tpb $point 1 $n_jobs
     done
 
     for cov in 0.3 0.4 0.45 0.5 0.55 0.6 0.7; do
-        if [[ ! -d out/point-$str_point-cov$cov ]]; then
-            ./run-jobs-runid-points ../points/lar-vuv-point.mac.template \
-                $n_jobs "point-$str_point-cov$cov" $def_abs $def_refl $cov $def_tpb $point
-        fi
+        process_simulation_run_point lar-vuv-point $def_abs $def_refl $cov $def_tpb $point 1 $n_jobs
     done
 
-    for refl in 0.5 0.75 1 1.25 1.5; do
-        if [[ ! -d out/point-$str_point-refl$refl ]]; then
-            ./run-jobs-runid-points ../points/lar-vuv-point.mac.template \
-                $n_jobs "point-$str_point-refl$refl" $def_abs $refl $def_cov $def_tpb $point
-        fi
+    for refl in 0.5 0.75 1.0 1.25 1.5; do
+        process_simulation_run_point lar-vuv-point $def_abs $refl $def_cov $def_tpb $point 1 $n_jobs
     done
 
-    abs_low=15
-    for cov in 0.3 0.4 0.45 0.5 0.55 0.6 0.7; do
-        if [[ ! -d out/point-$str_point-abs$abs_low-cov$cov ]]; then
-            ./run-jobs-runid-points ../points/lar-vuv-point.mac.template \
-                $n_jobs "point-$str_point-abs$abs_low-cov$cov" $abs_low $def_refl $cov $def_tpb $point
-        fi
+    for tpb in 0.8 1.0 1.1; do
+        process_simulation_run_point lar-vuv-point $def_abs $def_refl $def_cov $tpb $point 1 $n_jobs
     done
 
-    for refl in 0.5 0.75 1 1.25 1.5; do
-        if [[ ! -d out/point-$str_point-abs$abs_low-refl$refl ]]; then
-            ./run-jobs-runid-points ../points/lar-vuv-point.mac.template \
-                $n_jobs "point-$str_point-abs$abs_low-refl$refl" $abs_low $refl $def_cov $def_tpb $point
-        fi
-    done
 done

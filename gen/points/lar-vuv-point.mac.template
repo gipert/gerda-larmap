@@ -19,7 +19,7 @@
 /MG/geometry/general/constructMiniShroud          true
 /MG/geometry/general/constructLArInstrumentation  true
 
-/MG/materials/LAr/XUVAbsLength                    ${ABSLENGTH}
+/MG/materials/LAr/XUVAbsLength                    ${ABSLENGTH} cm
 /MG/materials/LAr/PhotonYieldPerMeV               28120
 /MG/materials/ScaleMetalReflectivity              ${METALREFL}
 /MG/materials/ScaleTPBQuantumEfficiency           ${TPBEFF}

@@ -52,6 +52,21 @@ fill_template_macro() {
     \sed "s|\${OUTNAME}|$rootfile|g" "$template_file"
 }
 
+fill_template_macro_point() {
+
+    local template_file="$1"
+    local rootfile="$2"
+    \sed -e "s|\${OUTNAME}|$rootfile|g" \
+        -e "s|\${ABSLENGTH}|$3|g" \
+        -e "s|\${METALREFL}|$4|g" \
+        -e "s|\${FIBCOVERAGE}|$5|g" \
+        -e "s|\${TPBEFF}|$6|g" \
+        -e "s|\${X}|$7|g" \
+        -e "s|\${Y}|$8|g" \
+        -e "s|\${Z}|$9|g" \
+        "$template_file"
+}
+
 submit_mage_job() {
 
     local job_name="$1"; shift
@@ -160,6 +175,44 @@ process_simulation_run() {
 
     for i in `seq -f "%05g" $start_id $(expr $start_id + $n_macros - 1)`; do
         fill_template_macro "../${template}.mac.template" "${name_id}/output/${name_id}-${i}.root" \
+            > "$sim_dir/${name_id}/macros/${name_id}-${i}.mac"
+    done
+
+    submit_mage_runid_jobs $name_id $start_id $(expr $start_id + $n_macros - 1)
+}
+
+process_simulation_run_point() {
+
+    joblist=""
+
+    $dryrun && print_log warn "running in dry-run mode, no jobs will be actually sent"
+
+    local template="$1"
+    local absl=$2
+    local refl=$3
+    local cov=$4
+    local tpbeff=$5
+    local x=$6
+    local y=$7
+    local z=$8
+    local copy_num=$(printf "%05d" $9)
+    local n_macros=${10}
+    local start_id=${11:-1}
+
+    if [[ ! -f "../points/${template}.mac.template" ]]; then
+        print_log err "../points/${template}.mac.template: no such file or directory"
+        return
+    fi
+
+    local name_id="${template}-${x}_${y}_${z}-absl${absl}-cov${cov}-refl${refl}-tpbeff${tpbeff}-${copy_num}"
+    print_log info "creating '$name_id' macros"
+
+    \mkdir -p "$sim_dir/$name_id"/{macros,output}
+
+    for i in `seq -f "%05g" $start_id $(expr $start_id + $n_macros - 1)`; do
+        fill_template_macro_point "../points/${template}.mac.template" \
+            "${name_id}/output/${name_id}-${i}.root" \
+            $absl $refl $cov $tpbeff $x $y $z \
             > "$sim_dir/${name_id}/macros/${name_id}-${i}.mac"
     done
 
