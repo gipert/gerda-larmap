@@ -3,7 +3,7 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 
-dryrun=true
+dryrun=false
 basedir=${BASEDIR:-`realpath $(dirname "$0")/..`}
 sim_dir=${SIM_DIR:-"${basedir}/gen/jobs/sim"}
 templates_dir="${basedir}/gen"
@@ -80,9 +80,9 @@ submit_mage_job_array() {
 
     if [[ $manager == "qsub" ]]; then
         if $dryrun; then
-            print_log info "qsub -P short -N $job_name -t ${start_idx}-${stop_idx} ${basedir}/src/aux/MaGe.qsub $@"
+            print_log info "qsub -P short -v BASEDIR=$basedir -N $job_name -t ${start_idx}-${stop_idx} ${basedir}/src/aux/MaGe.qsub $@"
         else
-            \qsub -P short -N "$job_name" -t ${start_idx}-${stop_idx} "${basedir}/src/aux/MaGe.qsub" "$@"
+            \qsub -P short -v BASEDIR="$basedir" -N "$job_name" -t ${start_idx}-${stop_idx} "${basedir}/src/aux/MaGe.qsub" "$@"
         fi
     # add your cluster manager here...
     fi
@@ -213,9 +213,9 @@ submit_create_larmap_job() {
     else
         if [[ $manager == "qsub" ]]; then
             if $dryrun; then
-                print_log info "qsub -P short -N $job_name ${basedir}/src/aux/create-larmap.qsub $@"
+                print_log info "qsub -P short -v BASEDIR=$basedir -N $job_name ${basedir}/src/aux/create-larmap.qsub $@"
             else
-                \qsub -P short -N "$job_name" "${basedir}/src/aux/create-larmap.qsub" "$@"
+                \qsub -P short -v BASEDIR="$basedir" -N "$job_name" "${basedir}/src/aux/create-larmap.qsub" "$@"
             fi
         elif [[ $manager == "slurm" ]]; then
             \sbatch -J "$job_name" "${basedir}/src/aux/create-larmap.slurm" "$@"
@@ -228,16 +228,18 @@ submit_post_processing_jobs() {
 
     pattern=${1:-"lar-vuv-*"}
 
+    \mkdir -p "${basedir}/jobs/output"
+
     for sim_id in `\find "$sim_dir" -maxdepth 1 -name "$pattern" | sed "s|$sim_dir/||g"`; do
 
         local job_name="larmap-${sim_id}"
 
-        if [[ ! -f "jobs/output/gerda-larmap-${sim_id}.root" ]]; then
+        if [[ ! -f "${basedir}/jobs/output/gerda-larmap-${sim_id}.root" ]]; then
 
             print_log info "submitting '$job_name' jobs"
 
             if [[ "$sim_id" =~ ^lar-vuv-point-.* ]]; then
-                if [[ "$sim_id" =~ .*-(-?[0-9]+_-?[0-9]+_-?[0-9]+)-.* ]]; then
+                if [[ "$sim_id" =~ .*point-(-?[0-9]+_-?[0-9]+_-?[0-9]+)-.* ]]; then
                     substr="${BASH_REMATCH[1]}"
                     submit_create_larmap_job "$sim_id" "${basedir}/settings/points/prob-map-settings-${substr}.json"
                 else
@@ -249,7 +251,6 @@ submit_post_processing_jobs() {
 
         else
             print_log warn "'$job_name' jobs look up to date, won't submit"
-            return
         fi
     done
 }

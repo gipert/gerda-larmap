@@ -86,7 +86,9 @@ int main(int argc, char** argv) {
 
     reader.SetTree(&chain);
 
-    progressbar bar(chain.GetEntries());
+    auto entries = chain.GetEntries();
+    if (entries <= 0) std::runtime_error("No entries in TTree.");
+    progressbar bar(entries);
     chain.LoadTree(0);
 
     std::cout << "INFO: looping over events ";

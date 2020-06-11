@@ -3,18 +3,16 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 #
-# USAGE: qsub mage-runner.qsub <mage-macro-file>
+# USAGE: qsub MaGe.qsub <mage-macro-file>
 #
 #$ -j y
-#$ -cwd
 #$ -p -2
 #$ -o /dev/null
 #$ -e /dev/null
 
-basedir=`realpath $(dirname "$0")/../..`
 macro="${1}-`printf "%05d" ${SGE_TASK_ID}`.mac"
 logfile="${macro%.*}.out"
-echo "Container: `readlink -f ${basedir}/gerda-sw-all_active.sif`" > $logfile
+echo "Container: `readlink -f ${BASEDIR}/gerda-sw-all_active.sif`" > $logfile
 
-singularity exec --cleanenv "${basedir}/gerda-sw-all_active.sif" /usr/bin/time -v \
+singularity exec --cleanenv "${BASEDIR}/gerda-sw-all_active.sif" /usr/bin/time -v \
     MaGe --no-colors "$macro" &>> $logfile
