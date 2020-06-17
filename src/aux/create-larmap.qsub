@@ -3,12 +3,13 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Sun 24 Mar 2019
 #
+#$ -cwd
 #$ -P short
 #$ -j y
 #$ -o /dev/null
 #$ -e /dev/null
 
-singularity exec "$BASEDIR/gerda-larmap.sif" \
+/usr/bin/time -v singularity exec "$BASEDIR/gerda-larmap.sif" \
     create-larmap "$2" \
         "$BASEDIR/gen/jobs/sim/$1/output/lar-vuv-*.root" \
         "$BASEDIR/jobs/output/gerda-larmap-$1.root" &> "$BASEDIR/jobs/output/create-larmap-$1.log"

@@ -6,6 +6,7 @@
 # USAGE: qsub MaGe.qsub <mage-macro-file>
 #
 #$ -j y
+#$ -cwd
 #$ -p -2
 #$ -o /dev/null
 #$ -e /dev/null
