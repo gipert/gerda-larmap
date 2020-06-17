@@ -24,8 +24,6 @@
 #include "gerda-ada/T4SimConfig.h"
 #include "gerda-ada/T4SimHandler.h"
 
-#include "progressbar.hpp"
-
 bool divide_maps(TH3* out, const TH3* h1, const TH3* h2);
 
 int main(int argc, char** argv) {
@@ -46,6 +44,11 @@ int main(int argc, char** argv) {
     std::cout << "INFO: opening MaGe files: " << filelist << std::endl;
     TChain chain("fTree");
     chain.Add(filelist.c_str());
+
+    // write to disk
+    auto filename = argc > 3 ? argv[3] : config["output"].Or("gerda-larmap.root").As<std::string>();
+    std::cout << "INFO: using output file: " << filename << std::endl;
+    TFile fout(filename.c_str(), "recreate");
 
     // initialize probability map
     auto& s = config;
@@ -88,7 +91,6 @@ int main(int argc, char** argv) {
 
     auto entries = chain.GetEntries();
     if (entries <= 0) std::runtime_error("No entries in TTree.");
-    progressbar bar(entries);
     chain.LoadTree(0);
 
     std::cout << "INFO: looping over events ";
@@ -98,8 +100,6 @@ int main(int argc, char** argv) {
         // check if the photon reaches the LAr instrumentation
         simHandler.GetEntry(reader.GetCurrentEntry());
         if (simHandler.GetLArEvent()->GetIsVetoed()) vertex_hits_map.Fill(x[0], y[0], z[0]);
-
-        bar.update();
     }
     std::cout << std::endl;
 
@@ -107,8 +107,6 @@ int main(int argc, char** argv) {
     divide_maps(&prob_map, &vertex_hits_map, &vertex_map);
 
     // write to disk
-    auto filename = argc > 3 ? argv[3] : config["output"].Or("gerda-larmap.root").As<std::string>();
-    TFile fout(filename.c_str(), "recreate");
     vertex_map.Write();
     vertex_hits_map.Write();
     prob_map.Write();

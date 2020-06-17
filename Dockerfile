@@ -1,4 +1,4 @@
-FROM docker.pkg.github.com/mppmu/gerda-sw-all/gerda-sw-all:6.1.1-dev
+FROM mppmu/gerda-sw-all:7.0.0-mage-v1.1.1.p1-larmap-t4z
 
 USER root
 
