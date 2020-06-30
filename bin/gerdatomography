@@ -147,10 +147,12 @@ void do_visualize(int rebin, bool array_closeup) {
     std::cout << "INFO: preparing histogram..." << std::endl;
     // this is needed for a meaningful rebin...
     float max_prob = 0;
+    float min_prob = 1;
     for (int i = 0; i < LAr_prob_map->GetNcells(); ++i) {
         auto _p = LAr_prob_map->GetBinContent(i);
         if (_p < 0) LAr_prob_map->SetBinContent(i, 0);
         if (_p > max_prob) max_prob = _p;
+        if (_p > 0 and _p < min_prob) min_prob = _p;
     }
 
     // eventually rebin
@@ -160,7 +162,7 @@ void do_visualize(int rebin, bool array_closeup) {
     LAr_prob_map->SetTitle("LAr photon detection probability map;x (cm);y (cm);z (cm)");
     LAr_prob_map->SetLineColor(kBlack);
     LAr_prob_map->SetStats(false);
-    LAr_prob_map->SetMinimum(0);
+    LAr_prob_map->SetMinimum(min_prob);
     LAr_prob_map->SetMaximum(max_prob);
 
     std::cout << "INFO: preparing 3D cut view" << std::endl;
@@ -235,8 +237,9 @@ void do_visualize(int rebin, bool array_closeup) {
     hp_xz->SetTitleOffset(1.30, "Y");
     hp_xz->SetZTitle("");
     hp_xz->SetStats(false);
-    hp_xz->SetMinimum(0);
+    hp_xz->SetMinimum(min_prob);
     hp_xz->SetMaximum(max_prob);
+    hp_xz->GetZaxis()->SetRangeUser(min_prob, max_prob);
     hp_xz->SetTitle("XZ slice");
     xz_pad->cd();
     hp_xz->Draw("colz");
@@ -248,21 +251,22 @@ void do_visualize(int rebin, bool array_closeup) {
     hp_xy->SetTitleOffset(1.30, "Y");
     hp_xy->SetZTitle("");
     hp_xy->SetStats(false);
-    hp_xy->SetMinimum(0);
+    hp_xy->SetMinimum(min_prob);
     hp_xy->SetMaximum(max_prob);
+    hp_xy->GetZaxis()->SetRangeUser(min_prob, max_prob);
     hp_xy->SetTitle("XY slice");
     xy_pad->cd();
     hp_xy->Draw("colz");
 
     // attach dynamic behaviour
-    main_pad->AddExec("dynamic", Form("dynamic_exec(%d, %f)", array_closeup, max_prob));
+    main_pad->AddExec("dynamic", Form("dynamic_exec(%d, %f, %f)", array_closeup, min_prob, max_prob));
 
     return;
 }
 
 TBox *line_xz, *line_xy;
 
-void dynamic_exec(bool array_closeup, float max_prob) {
+void dynamic_exec(bool array_closeup, float min_prob, float max_prob) {
 
     auto nbins = 1;
 
@@ -405,8 +409,9 @@ void dynamic_exec(bool array_closeup, float max_prob) {
         hp_xz->SetTitleOffset(1.30, "Y");
         hp_xz->SetZTitle("");
         hp_xz->SetStats(false);
-        hp_xz->SetMinimum(0);
+        hp_xz->SetMinimum(min_prob);
         hp_xz->SetMaximum(max_prob);
+        hp_xz->GetZaxis()->SetRangeUser(min_prob, max_prob);
         hp_xz->Draw("colz");
     }
 
@@ -449,8 +454,9 @@ void dynamic_exec(bool array_closeup, float max_prob) {
         hp_xy->SetTitleOffset(1.30, "Y");
         hp_xy->SetZTitle("");
         hp_xy->SetStats(false);
-        hp_xy->SetMinimum(0);
+        hp_xy->SetMinimum(min_prob);
         hp_xy->SetMaximum(max_prob);
+        hp_xy->GetZaxis()->SetRangeUser(min_prob, max_prob);
         hp_xy->Draw("colz");
     }
 
