@@ -89,12 +89,9 @@ int main(int argc, char** argv) {
 
     reader.SetTree(&chain);
 
-    auto entries = chain.GetEntries();
-    if (entries <= 0) std::runtime_error("No entries in TTree.");
-    chain.LoadTree(0);
-
-    std::cout << "INFO: looping over events ";
+    std::cout << "INFO: looping over events " << std::endl;
     while (reader.Next()) {
+
         vertex_map.Fill(x[0], y[0], z[0]); // vertex_totnum should be always == 1
 
         // check if the photon reaches the LAr instrumentation

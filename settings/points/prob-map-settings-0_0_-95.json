@@ -2,5 +2,5 @@
     "range-cm" : [[-0.25, 0.25], [-0.25, 0.25], [-95.25, -94.75]],
     "bins" : [1, 1, 1],
     "mapping" : "../mapping-spmMerged.json",
-    "lar-settings" : "../lar-settings-55cm_0.50cov.json"
+    "lar-settings" : "../lar-settings.json"
 }
