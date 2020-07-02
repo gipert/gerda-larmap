@@ -1,0 +1,64 @@
+//usr/bin/env root -l $0\(\"$1\",\"$2\"\); exit $?
+
+bool divide_maps(TH3* out, const TH3* h1, const TH3* h2) {
+
+    if (!out or !h1 or !h2) {
+        std::cerr << "ERROR: passing a nullptr to divide_maps.";
+        return false;
+    }
+
+    for (int i = 0; i < h1->GetNcells(); ++i) {
+        double c1 = h1->GetBinContent(i);
+        double c2 = h2->GetBinContent(i);
+
+        if (c2 == 0) {
+            out->SetBinContent(i, -1); // -1 means zero statistics
+            out->SetBinError(i, -1);
+        }
+        else {
+            out->SetBinContent(i, c1/c2);
+            // compute uncertainty according to Bernoulli statistics
+            // (leads to non-sense values when c1 = 0 or c1 = c2)
+            out->SetBinError(i, TMath::Sqrt((c1/c2)*(1-c1/c2)/c2));
+        }
+    }
+
+    return true;
+}
+
+void divide(std::string f1, std::string f2) {
+
+    auto tf1 = TFile::Open(f1.c_str());
+    auto h1 = (TH3*)tf1->Get("LAr_prob_map");
+    h1->SetName("h1");
+
+    auto tf2 = TFile::Open(f2.c_str());
+    auto h2 = (TH3*)tf2->Get("LAr_prob_map");
+    h2->SetName("h2");
+
+    // this is needed for a meaningful rebin...
+    for (int i = 0; i < h1->GetNcells(); ++i) {
+        auto _p = h1->GetBinContent(i);
+        if (_p < 0) h1->SetBinContent(i, 0);
+    }
+    for (int i = 0; i < h2->GetNcells(); ++i) {
+        auto _p = h2->GetBinContent(i);
+        if (_p < 0) h2->SetBinContent(i, 0);
+    }
+
+    auto& h = h1;
+    TH3F *hout = new TH3F(
+        "LAr_prob_map", h->GetTitle(),
+        h->GetNbinsX(), h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax(),
+        h->GetNbinsY(), h->GetYaxis()->GetXmin(), h->GetYaxis()->GetXmax(),
+        h->GetNbinsZ(), h->GetZaxis()->GetXmin(), h->GetZaxis()->GetXmax()
+    );
+
+    divide_maps(hout, h1, h2);
+
+    TFile fout("gerda-larmap-division.root", "recreate");
+    fout.cd();
+    hout->Write();
+}
+
+// vim: filetype=cpp

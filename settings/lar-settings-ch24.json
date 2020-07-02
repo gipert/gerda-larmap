@@ -1,0 +1,29 @@
+{
+    "settings": {
+        "pmt00" : {"efficiency": 0.0},
+        "pmt01" : {"efficiency": 0.0},
+        "pmt02" : {"efficiency": 0.0},
+        "pmt03" : {"efficiency": 0.0},
+        "pmt04" : {"efficiency": 0.0},
+        "pmt05" : {"efficiency": 0.0},
+        "pmt06" : {"efficiency": 0.0},
+        "pmt07" : {"efficiency": 0.0},
+        "pmt08" : {"efficiency": 0.0},
+        "pmb09" : {"efficiency": 0.0},
+        "pmb10" : {"efficiency": 0.0},
+        "pmb11" : {"efficiency": 0.0},
+        "pmb12" : {"efficiency": 0.0},
+        "pmb13" : {"efficiency": 0.0},
+        "pmb14" : {"efficiency": 0.0},
+        "pmb15" : {"efficiency": 0.0},
+        "spm16" : {"efficiency": 0.0},
+        "spm17" : {"efficiency": 0.0},
+        "spm18" : {"efficiency": 0.0},
+        "spm19" : {"efficiency": 0.0},
+        "spm20" : {"efficiency": 0.0},
+        "spm21" : {"efficiency": 0.0},
+        "spm22" : {"efficiency": 0.0},
+        "spm23" : {"efficiency": 0.0},
+        "spm24" : {"efficiency": 1.0}
+    }
+}

@@ -10,10 +10,10 @@ FLAGS += $$(gerda-ada-config --libs --cflags)
 FLAGS += $$(gelatio-config --libs --cflags)
 FLAGS += $$(mgdo-config --libs --cflags)
 FLAGS += $$(databricxx-config --libs --cflags)
-FLAGS += -I.
+FLAGS += -Isrc/tools
 
 PREFIX = /usr/local
-EXE = bin/create-larmap bin/larmap-doctor bin/map-merger bin/map-smoother
+EXE = bin/create-larmap bin/larmap-doctor bin/map-merger bin/map-smoother bin/create-larmap-from10deg
 
 all : init $(EXE)
 
