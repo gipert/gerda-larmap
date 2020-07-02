@@ -12,4 +12,4 @@
 /usr/bin/time -v singularity exec "$BASEDIR/gerda-larmap.sif" \
     create-larmap "$2" \
         "$BASEDIR/gen/jobs/sim/$1/output/lar-vuv-*.root" \
-        "$BASEDIR/jobs/output/gerda-larmap-$1.root" &> "$BASEDIR/jobs/output/create-larmap-$1.log"
+        "$BASEDIR/jobs/$OUTDIR/gerda-larmap-$1.root" &> "$BASEDIR/jobs/$OUTDIR/create-larmap-$1.log"

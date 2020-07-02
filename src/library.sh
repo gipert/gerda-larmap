@@ -5,7 +5,8 @@
 
 dryrun=false
 basedir=${BASEDIR:-`realpath $(dirname "$0")/..`}
-sim_dir=${SIM_DIR:-"${basedir}/gen/jobs/sim"}
+simdir=${simdir:-"${basedir}/gen/jobs/sim"}
+outdir=${outdir:-"output"}
 templates_dir="${basedir}/gen"
 
 print_log() {
@@ -76,7 +77,7 @@ submit_mage_job_array() {
     local stop_idx=$3;
     shift 3
 
-    \cd "${sim_dir}"
+    \cd "${simdir}"
 
     if [[ $manager == "qsub" ]]; then
         if $dryrun; then
@@ -117,7 +118,7 @@ submit_mage_runid_jobs() {
 
     local do_rerun=false
     for i in `seq -f "%05g" $start_idx $stop_idx`; do
-        if [[ ! -f "$sim_dir/$sim_id/output/${sim_id}-${i}.root" ]]; then
+        if [[ ! -f "$simdir/$sim_id/output/${sim_id}-${i}.root" ]]; then
             do_rerun=true
         fi
     done
@@ -155,11 +156,11 @@ process_simulation_run() {
     local name_id="${template}-${copy_num}"
     print_log info "creating '$name_id' macros"
 
-    \mkdir -p "$sim_dir/$name_id"/{macros,output}
+    \mkdir -p "$simdir/$name_id"/{macros,output}
 
     for i in `seq -f "%05g" $start_id $(expr $start_id + $n_macros - 1)`; do
         fill_template_macro "${templates_dir}/${template}.mac.template" "${name_id}/output/${name_id}-${i}.root" \
-            > "$sim_dir/${name_id}/macros/${name_id}-${i}.mac"
+            > "$simdir/${name_id}/macros/${name_id}-${i}.mac"
     done
 
     submit_mage_runid_jobs $name_id $start_id $(expr $start_id + $n_macros - 1)
@@ -191,13 +192,13 @@ process_simulation_run_point() {
     local name_id="${template}-${x}_${y}_${z}-absl${absl}-cov${cov}-refl${refl}-tpbeff${tpbeff}-${copy_num}"
     print_log info "creating '$name_id' macros"
 
-    \mkdir -p "$sim_dir/$name_id"/{macros,output}
+    \mkdir -p "$simdir/$name_id"/{macros,output}
 
     for i in `seq -f "%05g" $start_id $(expr $start_id + $n_macros - 1)`; do
         fill_template_macro_point "${templates_dir}/points/${template}.mac.template" \
             "${name_id}/output/${name_id}-${i}.root" \
             $absl $refl $cov $tpbeff $x $y $z \
-            > "$sim_dir/${name_id}/macros/${name_id}-${i}.mac"
+            > "$simdir/${name_id}/macros/${name_id}-${i}.mac"
     done
 
     submit_mage_runid_jobs $name_id $start_id $(expr $start_id + $n_macros - 1)
@@ -213,9 +214,9 @@ submit_create_larmap_job() {
     else
         if [[ $manager == "qsub" ]]; then
             if $dryrun; then
-                print_log info "qsub -P short -v BASEDIR=$basedir -N $job_name ${basedir}/src/aux/create-larmap.qsub $@"
+                print_log info "qsub -P short -v BASEDIR=$basedir -v OUTDIR=${outdir} -N $job_name ${basedir}/src/aux/create-larmap.qsub $@"
             else
-                \qsub -P short -v BASEDIR="$basedir" -N "$job_name" "${basedir}/src/aux/create-larmap.qsub" "$@"
+                \qsub -P short -v BASEDIR="$basedir" -v OUTDIR="$outdir" -N "$job_name" "${basedir}/src/aux/create-larmap.qsub" "$@"
             fi
         elif [[ $manager == "slurm" ]]; then
             \sbatch -J "$job_name" "${basedir}/src/aux/create-larmap.slurm" "$@"
@@ -228,13 +229,13 @@ submit_post_processing_jobs() {
 
     pattern=${1:-"lar-vuv-*"}
 
-    \mkdir -p "${basedir}/jobs/output"
+    \mkdir -p "${basedir}/jobs/${outdir}"
 
-    for sim_id in `\find "$sim_dir" -maxdepth 1 -name "$pattern" | sed "s|$sim_dir/||g"`; do
+    for sim_id in `\find "$simdir" -maxdepth 1 -name "$pattern" | sed "s|$simdir/||g"`; do
 
         local job_name="larmap-${sim_id}"
 
-        if [[ ! -f "${basedir}/jobs/output/gerda-larmap-${sim_id}.root" ]]; then
+        if [[ ! -f "${basedir}/jobs/${outdir}/gerda-larmap-${sim_id}.root" ]]; then
 
             print_log info "submitting '$job_name' jobs"
 
