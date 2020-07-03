@@ -204,6 +204,27 @@ process_simulation_run_point() {
     submit_mage_runid_jobs $name_id $start_id $(expr $start_id + $n_macros - 1)
 }
 
+submit_create_larmap_slice_job() {
+
+    local sim_id="$1";
+    local job_name="larmap-${sim_id}"
+
+    if is_job_running "$job_name"; then
+        print_log warn "'$job_name' jobs look already running, won't submit"
+    else
+        if [[ $manager == "qsub" ]]; then
+            if $dryrun; then
+                print_log info "qsub -P short -v BASEDIR=$basedir -v OUTDIR=${outdir} -N $job_name ${basedir}/src/aux/create-larmap-from10deg.qsub $@"
+            else
+                \qsub -P short -v BASEDIR="$basedir" -v OUTDIR="$outdir" -N "$job_name" "${basedir}/src/aux/create-larmap-from10deg.qsub" "$@"
+            fi
+        elif [[ $manager == "slurm" ]]; then
+            \sbatch -J "$job_name" "${basedir}/src/aux/create-larmap-from10deg.slurm" "$@"
+        # add your cluster manager here...
+        fi
+    fi
+}
+
 submit_create_larmap_job() {
 
     local sim_id="$1";
@@ -246,6 +267,8 @@ submit_post_processing_jobs() {
                 else
                     print_log err "malformed point simulation id"
                 fi
+            elif [[ "$sim_id" =~ ^lar-vuv-.*-slice-.* ]]; then
+                submit_create_larmap_slice_job "$sim_id" "${basedir}/settings/prob-map-settings.json"
             else
                 submit_create_larmap_job "$sim_id" "${basedir}/settings/prob-map-settings.json"
             fi

@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# Author: Luigi Pertoldi - pertoldi@pd.infn.it
+# Created: Sun 24 Mar 2019
+#
+#$ -cwd
+#$ -P short
+#$ -j y
+#$ -o /dev/null
+#$ -e /dev/null
+
+/usr/bin/time -v singularity exec "$BASEDIR/gerda-larmap.sif" \
+    create-larmap-from10deg "$2" \
+        "$BASEDIR/gen/jobs/sim/$1/output/lar-vuv-*.root" \
+        "$BASEDIR/jobs/$OUTDIR/gerda-larmap-$1.root" &> "$BASEDIR/jobs/$OUTDIR/create-larmap-$1.log"
