@@ -3,7 +3,7 @@
  * Author: Luigi Pertoldi - pertoldi@pd.infn.it
  * Created: Sun 24 Mar 2019
  *
- * USAGE: create-larmap [<settings-dir>] [<MaGe-filelist>] [<output-filename>]
+ * USAGE: create-larmap [<prob-map-settings.json>] [<MaGe-filelist>] [<output-filename>] [<lar-settings.json>]
  *
  */
 #include <iostream>
@@ -29,7 +29,7 @@ bool divide_maps(TH3* out, const TH3* h1, const TH3* h2);
 int main(int argc, char** argv) {
 
     // load JSON settings
-    auto configfile = argc > 1 ? std::string(argv[1]) : "prob-map-settings.json";
+    auto configfile = argc > 1 ? argv[1] : "prob-map-settings.json";
     std::cout << "INFO: reading config file: " << configfile << std::endl;
     katrin::KTree config;
     katrin::KTreeFile(configfile).Read(config);
@@ -49,6 +49,8 @@ int main(int argc, char** argv) {
     auto filename = argc > 3 ? argv[3] : config["output"].Or("gerda-larmap.root").As<std::string>();
     std::cout << "INFO: using output file: " << filename << std::endl;
     TFile fout(filename.c_str(), "recreate");
+
+    auto lar_settings_file = argc > 4 ? argv[4] : configdir + config["lar-settings"].As<std::string>();
 
     // initialize probability map
     auto& s = config;
@@ -76,7 +78,7 @@ int main(int argc, char** argv) {
     // set up the Tier4izer
     gada::T4SimConfig simConfig;
     simConfig.LoadMapping(configdir + config["mapping"].As<std::string>());
-    simConfig.LoadLArSettings(configdir + config["lar-settings"].As<std::string>());
+    simConfig.LoadLArSettings(lar_settings_file);
 
     gada::T4SimHandler simHandler(&chain, &simConfig);
     simHandler.SetBranchAddresses();
