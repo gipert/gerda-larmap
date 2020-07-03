@@ -6,7 +6,7 @@
 dryrun=false
 basedir=${BASEDIR:-`realpath $(dirname "$0")/..`}
 simdir=${simdir:-"${basedir}/gen/jobs/sim"}
-outdir=${outdir:-"output"}
+outdir=${OUTDIR:-"output"}
 templates_dir="${basedir}/gen"
 
 print_log() {
