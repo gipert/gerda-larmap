@@ -5,7 +5,7 @@
 
 dryrun=false
 basedir=${BASEDIR:-`realpath $(dirname "$0")/..`}
-simdir=${simdir:-"${basedir}/gen/jobs/sim"}
+simdir=${SIMDIR:-"${basedir}/gen/jobs/sim"}
 outdir=${OUTDIR:-"output"}
 templates_dir="${basedir}/gen"
 
@@ -248,7 +248,8 @@ submit_create_larmap_job() {
 
 submit_post_processing_jobs() {
 
-    pattern=${1:-"lar-vuv-*"}
+    lar_settings=${1:-"lar-settings.json"}
+    pattern=${2:-"lar-vuv-*"}
 
     \mkdir -p "${basedir}/jobs/${outdir}"
 
@@ -263,14 +264,14 @@ submit_post_processing_jobs() {
             if [[ "$sim_id" =~ ^lar-vuv-point-.* ]]; then
                 if [[ "$sim_id" =~ .*point-(-?[0-9]+_-?[0-9]+_-?[0-9]+)-.* ]]; then
                     substr="${BASH_REMATCH[1]}"
-                    submit_create_larmap_job "$sim_id" "${basedir}/settings/points/prob-map-settings-${substr}.json"
+                    submit_create_larmap_job "$sim_id" "${basedir}/settings/points/prob-map-settings-${substr}.json" "${basedir}/settings/${lar_settings}"
                 else
                     print_log err "malformed point simulation id"
                 fi
             elif [[ "$sim_id" =~ ^lar-vuv-.*-slice-.* ]]; then
-                submit_create_larmap_slice_job "$sim_id" "${basedir}/settings/prob-map-settings.json"
+                submit_create_larmap_slice_job "$sim_id" "${basedir}/settings/prob-map-settings.json" "${basedir}/settings/${lar_settings}"
             else
-                submit_create_larmap_job "$sim_id" "${basedir}/settings/prob-map-settings.json"
+                submit_create_larmap_job "$sim_id" "${basedir}/settings/prob-map-settings.json" "${basedir}/settings/${lar_settings}"
             fi
 
         else

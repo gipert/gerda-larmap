@@ -29,7 +29,7 @@ bool divide_maps(TH3* out, const TH3* h1, const TH3* h2);
 int main(int argc, char** argv) {
 
     // load JSON settings
-    auto configfile = argc > 1 ? argv[1] : "prob-map-settings.json";
+    auto configfile = argc > 1 ? std::string(argv[1]) : "prob-map-settings.json";
     std::cout << "INFO: reading config file: " << configfile << std::endl;
     katrin::KTree config;
     katrin::KTreeFile(configfile).Read(config);
