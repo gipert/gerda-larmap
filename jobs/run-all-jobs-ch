@@ -1,0 +1,10 @@
+#!/bin/bash
+
+BASEDIR=`realpath $(dirname "$0")/../`
+
+for i in `seq 0 24`; do
+    rm $BASEDIR/settings/lar-settings.json
+    ln -s $BASEDIR/settings/lar-settings-ch$i.json $BASEDIR/settings/lar-settings.json
+    OUTDIR=output-ch$i source ../src/library.sh
+    submit_post_processing_jobs
+done

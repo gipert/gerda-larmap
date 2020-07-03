@@ -3,6 +3,9 @@
 bin
 /gen/jobs/sim
 /jobs/output
+/jobs/merged
+/jobs/output-*
+/jobs/merged-*
 
 # junk
 *.DS_Store
