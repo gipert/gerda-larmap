@@ -207,7 +207,7 @@ process_simulation_run_point() {
 submit_create_larmap_slice_job() {
 
     local sim_id="$1";
-    local job_name="larmap-${sim_id}"
+    local job_name="larmap-${sim_id}-${outdir}"
 
     if is_job_running "$job_name"; then
         print_log warn "'$job_name' jobs look already running, won't submit"
@@ -228,7 +228,7 @@ submit_create_larmap_slice_job() {
 submit_create_larmap_job() {
 
     local sim_id="$1";
-    local job_name="larmap-${sim_id}"
+    local job_name="larmap-${sim_id}-${outdir}"
 
     if is_job_running "$job_name"; then
         print_log warn "'$job_name' jobs look already running, won't submit"
