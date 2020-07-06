@@ -7,4 +7,4 @@ BASEDIR=`realpath $(dirname "$0")/../`
 OUTDIR="output-avg"
 source $BASEDIR/src/library.sh
 
-submit_post_processing_jobs lar-map-settings.json
+submit_post_processing_jobs lar-settings.json

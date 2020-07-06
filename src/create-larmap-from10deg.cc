@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
 
             ang_rad = (2*M_PI/360)*ang;
             x_new = x[0]*std::cos(ang_rad) - y[0]*std::sin(ang_rad);
-            y_new = y[0]*std::sin(ang_rad) + y[0]*std::cos(ang_rad);
+            y_new = x[0]*std::sin(ang_rad) + y[0]*std::cos(ang_rad);
 
             vertex_map.Fill(x_new, y_new, z[0]); // vertex_totnum should be always == 1
 
