@@ -226,7 +226,7 @@ void do_visualize(int rebin, bool array_closeup) {
     main_pad->cd();
 
     std::cout << "INFO: displaying, this could take a while..." << std::endl;
-    LAr_prob_map_draw->Draw("a fb bb iso");
+    LAr_prob_map_draw->Draw("a fb bb lego");
     // LAr_prob_map->Draw("a fb bb iso");
 
     // pre-draw something
@@ -244,7 +244,7 @@ void do_visualize(int rebin, bool array_closeup) {
     xz_pad->cd();
     hp_xz->Draw("colz");
 
-    auto hp_xy = dynamic_cast<TH2*>(LAr_prob_map->Project3D("xy"));
+    auto hp_xy = dynamic_cast<TH2*>(LAr_prob_map->Project3D("yx"));
     hp_xy->Reset();
     hp_xy->SetTickLength(0.01, "X");
     hp_xy->SetTickLength(0.02, "Y");
@@ -440,7 +440,7 @@ void dynamic_exec(bool array_closeup, float min_prob, float max_prob) {
     if (hp_xy_old) delete hp_xy_old;
 
     // do the new projection
-    auto hp_xy = dynamic_cast<TH2*>(h->Project3D("xy"));
+    auto hp_xy = dynamic_cast<TH2*>(h->Project3D("yx"));
 
     zaxis->SetRange(first_xy, last_xy);
 
