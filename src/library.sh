@@ -105,7 +105,7 @@ is_job_running() {
     fi
 
     local job_name="$1";
-    echo "$joblist" | grep "$job_name" > /dev/null
+    echo "$joblist" | grep -E "\$$job_name^" > /dev/null
     [[ $? == 1 ]] && return 1 || return 0
 }
 
