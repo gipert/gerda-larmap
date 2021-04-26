@@ -1,0 +1,15 @@
+{
+   "settings": {
+      "pmt00" : {"efficiency": 0.138204},
+      "pmb01" : {"efficiency": 0.303206},
+      "spm02" : {"efficiency": 0.271516},
+      "spm03" : {"efficiency": 0.299340},
+      "spm04" : {"efficiency": 0.322757},
+      "spm05" : {"efficiency": 0.242725},
+      "spm06" : {"efficiency": 0.411600},
+      "spm07" : {"efficiency": 0.353176},
+      "spm08" : {"efficiency": 0.336825},
+      "spm09" : {"efficiency": 0.256556},
+      "spm10" : {"efficiency": 0.406483}
+   }
+}
