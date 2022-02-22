@@ -1,6 +1,6 @@
 {
     "range-cm" : [[10.75, 11.25], [-0.25, 0.25], [-24.25, -23.75]],
     "bins" : [1, 1, 1],
-    "mapping" : "../mapping-spmMerged.json",
+    "mapping" : "../mapping.json",
     "lar-settings" : "../lar-settings.json"
 }

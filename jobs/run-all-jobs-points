@@ -6,4 +6,4 @@
 BASEDIR=`realpath $(dirname "$0")/../`
 source $BASEDIR/src/library.sh
 
-submit_post_processing_jobs lar-map-settings.json "lar-vuv-point-*"
+submit_post_processing_jobs lar-settings.json "lar-vuv-point-*"
